@@ -1,8 +1,12 @@
 from aioredis import Redis
-from ._helper import parse_emojis
+import json
 
 
-async def assign(redis: Redis, user):
+async def assign_me(redis: Redis, user):
+    await redis.set("user", json.dumps(user))
+
+
+async def assign_member(redis: Redis, user):
     roles = user["roles"]
     guild_id = user["guild_id"]
 
