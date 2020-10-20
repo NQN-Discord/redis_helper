@@ -6,6 +6,10 @@ async def assign_me(redis: Redis, user):
     await redis.set("user", json.dumps(user))
 
 
+async def fetch_me(redis: Redis):
+    return json.loads(await redis.get("user"))
+
+
 async def assign_member(redis: Redis, user):
     roles = user["roles"]
     guild_id = user["guild_id"]

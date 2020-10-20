@@ -1,7 +1,12 @@
-from typing import Iterator
+from typing import Iterator, List
 from itertools import chain
 from aioredis import Redis
+import json
 from ._helper import guild_keys, GUILD_ATTRS, parse_roles, parse_emojis, parse_channels
+
+
+async def fetch_guild_ids(redis: Redis) -> List[int]:
+    return [int(i) for i in await redis.smembers("guilds")]
 
 
 async def intersect_shard(redis: Redis, shard_id: int, no_shards: int, keep: Iterator[int]):
@@ -52,3 +57,60 @@ async def assign(redis: Redis, guild):
 
     await tr.execute()
 
+
+async def fetch_guild_emojis_only(redis: Redis, guild_ids: List[int]):
+    tr = redis.pipeline()
+    futures = {}
+    for guild_id in guild_ids:
+        futures[guild_id] = {
+            "emojis": tr.hgetall(f"emojis-{guild_id}")
+        }
+    await tr.execute()
+    del tr
+
+    for guild_id in guild_ids:
+        yield {
+            "emojis": _parse_id_dict(await futures[guild_id]["emojis"]),
+            "id": guild_id
+        }
+
+
+async def fetch_guilds(redis: Redis, guild_ids: List[int], user, emojis: bool = False):
+    tr = redis.pipeline()
+    attrs = {"channels": tr.hgetall, "roles": tr.hgetall, "guild": tr.hgetall, "me": tr.smembers, "nick": tr.get}
+    if emojis:
+        attrs["emojis"] = tr.hgetall
+    futures = {}
+    for guild_id in guild_ids:
+        futures[guild_id] = {attr: f(f"{attr}-{guild_id}") for attr, f in attrs.items()}
+    await tr.execute()
+    del tr
+    for guild_id in guild_ids:
+        guild = {
+            "channels": _parse_id_dict(await futures[guild_id]["channels"]),
+            "roles": _parse_id_dict(await futures[guild_id]["roles"]),
+            "members": [{
+                "user": user,
+                "roles": [int(r) for r in await futures[guild_id]["me"]],
+                "nick": await futures[guild_id]["nick"]
+            }],
+            "id": guild_id,
+            **{k: v for k, v in (await futures[guild_id]["guild"]).items()},
+        }
+        if emojis:
+            guild["emojis"] = _parse_id_dict(await futures[guild_id]["emojis"])
+        for channel in guild["channels"]:
+            channel.pop("topic", None)
+        guild["member_count"] = int(guild.get("member_count", "0"))
+        guild["system_channel_id"] = guild.get("system_channel_id") or None
+        guild["premium_tier"] = int(guild.get("premium_tier", "0") or "0")
+        guild["icon"] = guild.get("icon") or None
+        try:
+            guild["members"][0]["joined_at"] = guild["joined_at"]
+        except KeyError:
+            guild["members"][0]["joined_at"] = None
+        yield guild
+
+
+def _parse_id_dict(d):
+    return [json.loads(v) for v in d.values()]
