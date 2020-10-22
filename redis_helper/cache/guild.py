@@ -75,6 +75,11 @@ async def fetch_guild_emojis_only(redis: Redis, guild_ids: List[int]):
         }
 
 
+async def fetch_guild(redis: Redis, guild_id: int, user=None):
+    async for guild in fetch_guilds(redis, guild_ids=[guild_id], user=user, emojis=True):
+        return guild
+
+
 async def fetch_guilds(redis: Redis, guild_ids: List[int], user, emojis: bool = False):
     tr = redis.pipeline()
     attrs = {"channels": tr.hgetall, "roles": tr.hgetall, "guild": tr.hgetall, "me": tr.smembers, "nick": tr.get}
