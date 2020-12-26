@@ -4,7 +4,7 @@ import json
 
 
 async def assign(redis: Redis, data):
-    await redis.set(f"guild-settings-cache-{data['guild_id']}", json.dumps(data), expire=5)
+    await redis.set(f"guild-settings-cache-{data['guild_id']}", json.dumps(data), expire=60)
 
 
 async def delete(redis: Redis, guild_id: int):
