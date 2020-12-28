@@ -27,8 +27,8 @@ async def fetch_emote_hash(redis: Redis, emote_id: int) -> Optional[str]:
     return await redis.get(f"extra-emote-id-hashes-{emote_id}")
 
 
-async def assign_emote_hash(self, emote_id: int, emote_hash: str) -> NoReturn:
-    await self.redis.set(f"extra-emote-id-hashes-{emote_id}", emote_hash)
+async def assign_emote_hash(redis: Redis, emote_id: int, emote_hash: str) -> NoReturn:
+    await redis.set(f"extra-emote-id-hashes-{emote_id}", emote_hash)
 
 
 async def increment_ids(redis: Redis, emote_ids: List[str]) -> NoReturn:
