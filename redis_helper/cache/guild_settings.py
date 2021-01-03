@@ -1,6 +1,6 @@
 from typing import Tuple, Optional, Dict
 from aioredis import Redis
-import json
+import ujson as json
 
 
 async def assign(redis: Redis, data):

@@ -1,4 +1,4 @@
-from typing import List, Optional, NoReturn
+from typing import List, Optional, NoReturn, Iterable
 from aioredis import Redis
 
 
@@ -31,7 +31,7 @@ async def assign_emote_hash(redis: Redis, emote_id: int, emote_hash: str) -> NoR
     await redis.set(f"extra-emote-id-hashes-{emote_id}", emote_hash)
 
 
-async def increment_ids(redis: Redis, emote_ids: List[str]) -> NoReturn:
+async def increment_ids(redis: Redis, emote_ids: Iterable[str]) -> NoReturn:
     tr = redis.pipeline()
     for id in emote_ids:
         tr.get(f"extra-emote-id-hashes-{id}")

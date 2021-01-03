@@ -1,5 +1,5 @@
 from typing import Awaitable, Tuple
-import json
+import ujson as json
 
 GUILD_ATTRS = ("name", "icon", "owner_id", "joined_at", "member_count", "system_channel_id", "premium_tier")
 

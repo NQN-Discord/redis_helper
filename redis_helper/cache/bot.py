@@ -1,5 +1,5 @@
 from aioredis import Redis
-import json
+import ujson as json
 
 
 async def assign_me(redis: Redis, user):

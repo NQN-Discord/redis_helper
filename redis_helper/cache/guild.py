@@ -1,7 +1,7 @@
 from typing import Iterator, List
 from itertools import chain
 from aioredis import Redis
-import json
+import ujson as json
 from ._helper import guild_keys, GUILD_ATTRS, parse_roles, parse_emojis, parse_channels
 
 
