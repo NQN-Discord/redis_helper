@@ -9,9 +9,9 @@ async def assign(redis: Redis, guild_id: int, emotes: Dict[str, str]) -> NoRetur
     if emotes:
         tr = redis.pipeline()
         for name, emote in emotes.items():
-            tr.set(f"emote_transform_emote_cache_{guild_id}_{name}", emote, expire=ONE_DAY)
+            tr.set(f"emote-transform-emote-cache-{guild_id}-{name}", emote, expire=ONE_DAY)
         await tr.execute()
 
 
 async def fetch(redis: Redis, guild_id: int, name: str) -> Optional[str]:
-    return await redis.get(f"emote_transform_emote_cache_{guild_id}_{name}")
+    return await redis.get(f"emote-transform-emote_cache-{guild_id}-{name}")
