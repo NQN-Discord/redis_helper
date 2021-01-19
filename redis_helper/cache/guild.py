@@ -1,7 +1,7 @@
 from typing import Iterator, List
 from itertools import chain
 from aioredis import Redis
-import ujson as json
+import msgpack
 from ._helper import guild_keys, GUILD_ATTRS, parse_roles, parse_emojis, parse_channels
 
 
@@ -63,7 +63,7 @@ async def fetch_guild_emojis_only(redis: Redis, guild_ids: List[int]):
     futures = {}
     for guild_id in guild_ids:
         futures[guild_id] = {
-            "emojis": tr.hgetall(f"emojis-{guild_id}")
+            "emojis": tr.hgetall(f"emojis-{guild_id}", encoding=None)
         }
     await tr.execute()
     del tr
@@ -82,25 +82,32 @@ async def fetch_guild(redis: Redis, guild_id: int, user=None):
 
 async def fetch_guilds(redis: Redis, guild_ids: List[int], user, emojis: bool = False):
     tr = redis.pipeline()
-    attrs = {"channels": tr.hgetall, "roles": tr.hgetall, "guild": tr.hgetall, "me": tr.smembers, "nick": tr.get}
+    attrs = {
+        "channels": tr.hgetall,
+        "roles": tr.hgetall,
+        "guild": tr.hgetall,
+        "me": tr.smembers,
+        "nick": tr.get
+    }
     if emojis:
         attrs["emojis"] = tr.hgetall
     futures = {}
     for guild_id in guild_ids:
-        futures[guild_id] = {attr: f(f"{attr}-{guild_id}") for attr, f in attrs.items()}
+        futures[guild_id] = {attr: f(f"{attr}-{guild_id}", encoding=None) for attr, f in attrs.items()}
     await tr.execute()
     del tr
     for guild_id in guild_ids:
+        nick = await futures[guild_id]["nick"]
         guild = {
             "channels": _parse_id_dict(await futures[guild_id]["channels"]),
             "roles": _parse_id_dict(await futures[guild_id]["roles"]),
             "members": [{
                 "user": user,
                 "roles": [int(r) for r in await futures[guild_id]["me"]],
-                "nick": await futures[guild_id]["nick"]
+                "nick": None if nick is None else nick.decode("utf-8")
             }],
             "id": guild_id,
-            **{k: v for k, v in (await futures[guild_id]["guild"]).items()},
+            **{k: v.decode("utf-8") for k, v in (await futures[guild_id]["guild"]).items()},
         }
         if emojis:
             guild["emojis"] = _parse_id_dict(await futures[guild_id]["emojis"])
@@ -118,4 +125,4 @@ async def fetch_guilds(redis: Redis, guild_ids: List[int], user, emojis: bool = 
 
 
 def _parse_id_dict(d):
-    return [json.loads(v) for v in d.values()]
+    return [msgpack.unpackb(v) for v in d.values()]

@@ -1,13 +1,13 @@
 from aioredis import Redis
-import ujson as json
+import msgpack
 
 
 async def assign_me(redis: Redis, user):
-    await redis.set("user", json.dumps(user))
+    await redis.set("user", msgpack.packb(user))
 
 
 async def fetch_me(redis: Redis):
-    return json.loads(await redis.get("user"))
+    return msgpack.unpackb(await redis.get("user", encoding=None))
 
 
 async def assign_member(redis: Redis, user):

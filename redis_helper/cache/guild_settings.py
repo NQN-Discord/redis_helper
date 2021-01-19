@@ -1,10 +1,10 @@
 from typing import Tuple, Optional, Dict
 from aioredis import Redis
-import ujson as json
+import msgpack
 
 
 async def assign(redis: Redis, data):
-    await redis.set(f"guild-settings-cache-{data['guild_id']}", json.dumps(data), expire=60)
+    await redis.set(f"guild-settings-cache-{data['guild_id']}", msgpack.packb(data), expire=60)
 
 
 async def delete(redis: Redis, guild_id: int):
@@ -15,4 +15,4 @@ async def fetch(redis: Redis, guild_id: int) -> Tuple[bool, Optional[Dict]]:
     data = await redis.get(f"guild-settings-cache-{guild_id}")
     if data is None:
         return False, None
-    return True, json.loads(data)
+    return True, msgpack.packb(data)

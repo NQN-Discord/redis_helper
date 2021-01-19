@@ -1,5 +1,5 @@
 from typing import Awaitable, Tuple
-import ujson as json
+import msgpack
 
 GUILD_ATTRS = ("name", "icon", "owner_id", "joined_at", "member_count", "system_channel_id", "premium_tier")
 
@@ -24,7 +24,7 @@ def parse_roles(tr, guild_id, roles):
         role.pop("color", None)
         role.pop("hoist", None)
     return OptionallyAwaitable(
-        tr.hmset_dict(f"roles-{guild_id}", {role["id"]: json.dumps(role) for role in roles})
+        tr.hmset_dict(f"roles-{guild_id}", {role["id"]: msgpack.packb(role) for role in roles})
     )
 
 
@@ -43,7 +43,7 @@ def parse_channels(tr, guild_id, channels):
 
     if not channels:
         return
-    return tr.hmset_dict(f"channels-{guild_id}", {channel["id"]: json.dumps(channel) for channel in channels})
+    return tr.hmset_dict(f"channels-{guild_id}", {channel["id"]: msgpack.packb(channel) for channel in channels})
 
 
 def parse_emojis(tr, guild_id, emojis):
@@ -53,4 +53,4 @@ def parse_emojis(tr, guild_id, emojis):
         emoji.pop("require_colons", None)
         emoji.pop("managed", None)
         emoji.pop("user", None)
-    return tr.hmset_dict(f"emojis-{guild_id}", {emoji["id"]: json.dumps(emoji) for emoji in emojis})
+    return tr.hmset_dict(f"emojis-{guild_id}", {emoji["id"]: msgpack.packb(emoji) for emoji in emojis})
