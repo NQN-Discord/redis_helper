@@ -107,7 +107,7 @@ async def fetch_guilds(redis: Redis, guild_ids: List[int], user, emojis: bool = 
                 "nick": None if nick is None else nick.decode("utf-8")
             }],
             "id": guild_id,
-            **{k: v.decode("utf-8") for k, v in (await futures[guild_id]["guild"]).items()},
+            **{k.decode("utf-8"): v.decode("utf-8") for k, v in (await futures[guild_id]["guild"]).items()},
         }
         if emojis:
             guild["emojis"] = _parse_id_dict(await futures[guild_id]["emojis"])
