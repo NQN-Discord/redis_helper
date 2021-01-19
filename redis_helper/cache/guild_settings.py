@@ -12,7 +12,7 @@ async def delete(redis: Redis, guild_id: int):
 
 
 async def fetch(redis: Redis, guild_id: int) -> Tuple[bool, Optional[Dict]]:
-    data = await redis.get(f"guild-settings-cache-{guild_id}")
+    data = await redis.get(f"guild-settings-cache-{guild_id}", encoding=None)
     if data is None:
         return False, None
-    return True, msgpack.packb(data)
+    return True, msgpack.unpackb(data)
