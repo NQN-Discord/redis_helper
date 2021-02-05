@@ -34,5 +34,5 @@ async def total_and_unique_messages(redis: Redis, user: int, content: str) -> Tu
 
 
 async def can_send_spam_dm(redis: Redis, user: int) -> bool:
-    can_send = await redis.set(f"user-ratelimit-dm-{user}", 0, expire=RATELIMIT_TIME, exist=redis.SET_IF_NOT_EXIST)
+    can_send = await redis.set(f"user-ratelimit-dm-{user}", 0, expire=DM_SPAM_RATELIMIT, exist=redis.SET_IF_NOT_EXIST)
     return bool(can_send)
