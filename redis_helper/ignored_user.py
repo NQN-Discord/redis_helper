@@ -40,7 +40,6 @@ async def delete_user_message(redis: Redis, user: int, content: str):
     await tr.execute()
 
 
-
 async def can_send_spam_dm(redis: Redis, user: int) -> bool:
     can_send = await redis.set(f"user-ratelimit-dm-{user}", 0, expire=DM_SPAM_RATELIMIT, exist=redis.SET_IF_NOT_EXIST)
     return bool(can_send)
