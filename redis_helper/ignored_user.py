@@ -1,6 +1,9 @@
 from typing import NoReturn, Tuple
 from aioredis import Redis
-from contextlib import asynccontextmanager
+try:
+    from contextlib import asynccontextmanager
+except ImportError:
+    from async_generator import asynccontextmanager
 
 DM_SPAM_RATELIMIT = 24 * 60 * 60
 RATELIMIT_TIME = 5 * 60

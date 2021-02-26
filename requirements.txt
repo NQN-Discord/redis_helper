@@ -1,3 +1,4 @@
 aioredis
 ujson
 msgpack
+async_generator

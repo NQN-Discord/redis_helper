@@ -8,5 +8,5 @@ setup(
    author='Blue',
    url="https://nqn.blue/",
    packages=find_packages(),
-   install_requires=["msgpack"]
+   install_requires=["msgpack", "async_generator"]
 )
