@@ -23,16 +23,16 @@ async def delete(redis: Redis, user: int) -> NoReturn:
 
 async def total_and_unique_messages(redis: Redis, user: int, content: str) -> Tuple[int, int, bool]:
     tr = redis.pipeline()
-    is_count_new = tr.ttl(f"user-ratelimit-count-{user}") == -2
-    is_unique_new = tr.ttl(f"user-ratelimit-unique-{user}") == -2
+    count_ttl = tr.ttl(f"user-ratelimit-count-{user}")
+    unique_ttl = tr.ttl(f"user-ratelimit-unique-{user}")
 
     total = tr.incr(f"user-ratelimit-count-{user}")
     is_unique = tr.sadd(f"user-ratelimit-unique-{user}", content)
     total_unique = tr.scard(f"user-ratelimit-unique-{user}")
     await tr.execute()
-    if await is_count_new:
+    if await count_ttl == -2:
         await redis.expire(f"user-ratelimit-count-{user}", RATELIMIT_TIME)
-    if await is_unique_new:
+    if await unique_ttl == -2:
         await redis.expire(f"user-ratelimit-unique-{user}", RATELIMIT_TIME)
     return await total, await total_unique, bool(await is_unique)
 
