@@ -1,8 +1,9 @@
 from typing import Iterator, List
 from itertools import chain
 from aioredis import Redis
-import msgpack
+from ..protobuf.discord_pb2 import RoleData, ChannelData, EmojiData
 from ._helper import guild_keys, GUILD_ATTRS, parse_roles, parse_emojis, parse_channels
+from google.protobuf.json_format import MessageToDict
 
 
 async def fetch_guild_ids(redis: Redis) -> List[int]:
@@ -99,8 +100,8 @@ async def fetch_guilds(redis: Redis, guild_ids: List[int], user, emojis: bool = 
     for guild_id in guild_ids:
         nick = await futures[guild_id]["nick"]
         guild = {
-            "channels": _parse_id_dict(await futures[guild_id]["channels"]),
-            "roles": _parse_id_dict(await futures[guild_id]["roles"]),
+            "channels": load_channels(await futures[guild_id]["channels"]),
+            "roles": load_roles(await futures[guild_id]["roles"]),
             "members": [{
                 "user": user,
                 "roles": [int(r) for r in await futures[guild_id]["me"]],
@@ -110,7 +111,7 @@ async def fetch_guilds(redis: Redis, guild_ids: List[int], user, emojis: bool = 
             **{k.decode("utf-8"): v.decode("utf-8") for k, v in (await futures[guild_id]["guild"]).items()},
         }
         if emojis:
-            guild["emojis"] = _parse_id_dict(await futures[guild_id]["emojis"])
+            guild["emojis"] = load_emojis(await futures[guild_id]["emojis"])
         for channel in guild["channels"]:
             channel.pop("topic", None)
         guild["member_count"] = int(guild.get("member_count", "0"))
@@ -124,5 +125,17 @@ async def fetch_guilds(redis: Redis, guild_ids: List[int], user, emojis: bool = 
         yield guild
 
 
-def _parse_id_dict(d):
-    return [msgpack.unpackb(v) for v in d.values()]
+def load_roles(d):
+    roles = [MessageToDict(RoleData.FromString(v), preserving_proto_field_name=True, use_integers_for_enums=True, including_default_value_fields=True) for v in d.values()]
+    for r in roles:
+        if r["bot_id"]:
+            r["tags"] = {"bot_id": r["bot_id"]}
+    return roles
+
+
+def load_emojis(d):
+    return [MessageToDict(EmojiData.FromString(v), preserving_proto_field_name=True, use_integers_for_enums=True, including_default_value_fields=True) for v in d.values()]
+
+
+def load_channels(d):
+    return [MessageToDict(ChannelData.FromString(v), preserving_proto_field_name=True, use_integers_for_enums=True, including_default_value_fields=True) for v in d.values()]

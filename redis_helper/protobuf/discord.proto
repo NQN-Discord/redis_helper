@@ -1,0 +1,57 @@
+syntax = "proto3";
+
+message RoleData {
+  fixed64 id = 1;
+  uint32 position = 2;
+  uint64 permissions = 3;
+  bool mentionable = 4;
+  bool managed = 5;
+  fixed64 bot_id = 6;
+  string name = 7;
+}
+
+message EmojiData {
+  fixed64 id = 1;
+  string name = 2;
+  bool animated = 3;
+  bool managed = 4;
+  bool available = 5;
+  repeated fixed64 roles = 6;
+}
+
+
+message ChannelData {
+  fixed64 id = 1;
+  fixed64 guild_id = 2;
+  string name = 3;
+  ChannelType type = 4;
+  bool nsfw = 5;
+  uint32 position = 6;
+  uint32 rate_limit_per_user = 7;
+  repeated ChannelPermissionOverwriteData permission_overwrites = 8;
+
+  enum ChannelType {
+    GUILD_TEXT = 0;
+    DM = 1;
+    GUILD_VOICE = 2;
+    GROUP_DM = 3;
+    GUILD_CATEGORY = 4;
+    GUILD_NEWS = 5;
+    GUILD_STORE = 6;
+    PUBLIC_THREAD = 7;
+    PRIVATE_THREAD = 8;
+    GUILD_STAGE_VOICE = 9;
+  }
+
+  message ChannelPermissionOverwriteData {
+    fixed64 id = 1;
+    ChannelPermissionOverwriteType type = 2;
+    uint64 allow = 3;
+    uint64 deny = 4;
+
+    enum ChannelPermissionOverwriteType {
+      ROLE = 0;
+      MEMBER = 1;
+    }
+  }
+}

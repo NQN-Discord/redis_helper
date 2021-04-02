@@ -1,6 +1,6 @@
 from aioredis import Redis
 from ._helper import parse_emojis
-from .guild import _parse_id_dict
+from .guild import load_emojis
 
 
 async def assign(redis: Redis, guild_id: int, emojis):
@@ -10,4 +10,4 @@ async def assign(redis: Redis, guild_id: int, emojis):
     if emojis:
         parse_emojis(tr, guild_id, emojis)
     await tr.execute()
-    return _parse_id_dict(await rtn)
+    return load_emojis(await rtn)
