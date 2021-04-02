@@ -2,7 +2,7 @@ syntax = "proto3";
 
 message RoleData {
   fixed64 id = 1;
-  uint32 position = 2;
+  int32 position = 2;
   uint64 permissions = 3;
   bool mentionable = 4;
   bool managed = 5;
@@ -26,7 +26,7 @@ message ChannelData {
   string name = 3;
   ChannelType type = 4;
   bool nsfw = 5;
-  uint32 position = 6;
+  int32 position = 6;
   uint32 rate_limit_per_user = 7;
   repeated ChannelPermissionOverwriteData permission_overwrites = 8;
 
