@@ -1,10 +1,11 @@
 from typing import List
 from aioredis import Redis, ReplyError
+from collections import defaultdict
 from hashlib import sha1
 import datetime
 
 
-EMOJI_COUNT_PER_DAY = 200
+EMOJI_COUNT_PER_DAY = 400
 hitters_script = f"""
 local set = KEYS[1]
 local set_length = {EMOJI_COUNT_PER_DAY}
@@ -33,7 +34,12 @@ async def get_hashes(redis: Redis):
     pipeline = redis.pipeline()
     for day_number in range(7):
         pipeline.zrevrange(f"emoji-heavy-hitters-{day_number}", 0, EMOJI_COUNT_PER_DAY, withscores=True)
-    print(await pipeline.execute())
+    results = await pipeline.execute()
+    rtn = defaultdict(lambda: 0)
+    for day in results:
+        for emote_hash, score in day:
+            rtn[emote_hash] += score
+    return sorted(rtn, key=rtn.get, reverse=True)
 
 
 async def _call_function(redis, script, script_hash, **kwargs):
