@@ -47,3 +47,8 @@ async def _call_function(redis, script, script_hash, **kwargs):
         await redis.evalsha(script_hash, **kwargs)
     except ReplyError:
         await redis.eval(script, **kwargs)
+
+
+async def delete_day(redis: Redis, date):
+    day_number = date.weekday()
+    await redis.delete(f"emoji-heavy-hitters-{day_number}")
