@@ -11,3 +11,7 @@ async def assign(redis: Redis, user_id: int) -> NoReturn:
 
 async def fetch(redis: Redis, user_id: int) -> bool:
     return await redis.exists(f"dm-blocked-{user_id}")
+
+
+async def delete(redis: Redis, user_id: int):
+    await redis.delete(f"dm-blocked-{user_id}")
