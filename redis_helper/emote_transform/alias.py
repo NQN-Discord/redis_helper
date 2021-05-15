@@ -1,4 +1,4 @@
-from typing import Dict, NoReturn
+from typing import Dict, NoReturn, List
 from aioredis import Redis
 
 
@@ -9,7 +9,11 @@ async def assign(redis: Redis, user: int, name: str, value: str) -> NoReturn:
     await tr.execute()
 
 
-async def fetch(redis: Redis, user: int, *names: str) -> str:
+async def fetch(redis: Redis, user: int, names: str) -> str:
+    return await redis.hget(f"aliases-{user}", names)
+
+
+async def fetch_multi(redis: Redis, user: int, names: List[str]) -> str:
     return await redis.hmget(f"aliases-{user}", *names)
 
 
