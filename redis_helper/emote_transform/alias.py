@@ -9,8 +9,8 @@ async def assign(redis: Redis, user: int, name: str, value: str) -> NoReturn:
     await tr.execute()
 
 
-async def fetch(redis: Redis, user: int, name: str) -> str:
-    return await redis.hget(f"aliases-{user}", name)
+async def fetch(redis: Redis, user: int, *names: str) -> str:
+    return await redis.hmget(f"aliases-{user}", *names)
 
 
 async def list(redis: Redis, user: int) -> Dict[str, str]:
