@@ -5,3 +5,4 @@ from . import guild
 from . import role
 from . import webhook
 from . import guild_settings
+from . import interactions
