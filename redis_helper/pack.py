@@ -1,28 +1,17 @@
-from typing import Iterator
 from aioredis import Redis
 
 ONE_WEEK = 7 * 24 * 60 * 60
 
 
-async def fetch_all_ids(redis: Redis) -> Iterator[int]:
-    return map(int, await redis.smembers("pack-guild-ids"))
-
-
-async def create(redis: Redis, guild_id: int):
-    tr = redis.pipeline()
-    tr.sadd("pack-guild-ids", guild_id)
+async def create(redis: Redis, guild_id: int, name: str):
+    tr = redis.multi_exec()
+    tr.zadd("pack-guild-names", 0, name)
     tr.set(f"pack-recent-{guild_id}", 0, expire=ONE_WEEK)
     await tr.execute()
 
 
-async def delete(redis: Redis, *guild_ids: int):
-    if not guild_ids:
-        return
-    await redis.srem("pack-guild-ids", *guild_ids)
-
-
-async def exists(redis: Redis, guild_id: int):
-    return bool(await redis.sismember("pack-guild-ids", guild_id))
+async def delete(redis: Redis, name: str):
+    await redis.zrem("pack-guild-names", name)
 
 
 async def created_recently(redis: Redis, guild_id: int) -> bool:
