@@ -3,6 +3,7 @@
 
 import sys
 _b=sys.version_info[0]<3 and (lambda x:x) or (lambda x:x.encode('latin1'))
+from google.protobuf.internal import enum_type_wrapper
 from google.protobuf import descriptor as _descriptor
 from google.protobuf import message as _message
 from google.protobuf import reflection as _reflection
@@ -19,37 +20,13 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='discord.proto',
   package='',
   syntax='proto3',
-  serialized_pb=_b('\n\rdiscord.proto\"\x81\x01\n\x08RoleData\x12\n\n\x02id\x18\x01 \x01(\x06\x12\x10\n\x08position\x18\x02 \x01(\x05\x12\x13\n\x0bpermissions\x18\x03 \x01(\x04\x12\x13\n\x0bmentionable\x18\x04 \x01(\x08\x12\x0f\n\x07managed\x18\x05 \x01(\x08\x12\x0e\n\x06\x62ot_id\x18\x06 \x01(\x06\x12\x0c\n\x04name\x18\x07 \x01(\t\"j\n\tEmojiData\x12\n\n\x02id\x18\x01 \x01(\x06\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x10\n\x08\x61nimated\x18\x03 \x01(\x08\x12\x0f\n\x07managed\x18\x04 \x01(\x08\x12\x11\n\tavailable\x18\x05 \x01(\x08\x12\r\n\x05roles\x18\x06 \x03(\x06\"\x82\x05\n\x0b\x43hannelData\x12\n\n\x02id\x18\x01 \x01(\x06\x12\x10\n\x08guild_id\x18\x02 \x01(\x06\x12\x0c\n\x04name\x18\x03 \x01(\t\x12&\n\x04type\x18\x04 \x01(\x0e\x32\x18.ChannelData.ChannelType\x12\x0c\n\x04nsfw\x18\x05 \x01(\x08\x12\x10\n\x08position\x18\x06 \x01(\x05\x12\x1b\n\x13rate_limit_per_user\x18\x07 \x01(\r\x12J\n\x15permission_overwrites\x18\x08 \x03(\x0b\x32+.ChannelData.ChannelPermissionOverwriteData\x1a\xdb\x01\n\x1e\x43hannelPermissionOverwriteData\x12\n\n\x02id\x18\x01 \x01(\x06\x12X\n\x04type\x18\x02 \x01(\x0e\x32J.ChannelData.ChannelPermissionOverwriteData.ChannelPermissionOverwriteType\x12\r\n\x05\x61llow\x18\x03 \x01(\x04\x12\x0c\n\x04\x64\x65ny\x18\x04 \x01(\x04\"6\n\x1e\x43hannelPermissionOverwriteType\x12\x08\n\x04ROLE\x10\x00\x12\n\n\x06MEMBER\x10\x01\"\xb7\x01\n\x0b\x43hannelType\x12\x0e\n\nGUILD_TEXT\x10\x00\x12\x06\n\x02\x44M\x10\x01\x12\x0f\n\x0bGUILD_VOICE\x10\x02\x12\x0c\n\x08GROUP_DM\x10\x03\x12\x12\n\x0eGUILD_CATEGORY\x10\x04\x12\x0e\n\nGUILD_NEWS\x10\x05\x12\x0f\n\x0bGUILD_STORE\x10\x06\x12\x11\n\rPUBLIC_THREAD\x10\x07\x12\x12\n\x0ePRIVATE_THREAD\x10\x08\x12\x15\n\x11GUILD_STAGE_VOICE\x10\tb\x06proto3')
+  serialized_pb=_b('\n\rdiscord.proto\"\x81\x01\n\x08RoleData\x12\n\n\x02id\x18\x01 \x01(\x06\x12\x10\n\x08position\x18\x02 \x01(\x05\x12\x13\n\x0bpermissions\x18\x03 \x01(\x04\x12\x13\n\x0bmentionable\x18\x04 \x01(\x08\x12\x0f\n\x07managed\x18\x05 \x01(\x08\x12\x0e\n\x06\x62ot_id\x18\x06 \x01(\x06\x12\x0c\n\x04name\x18\x07 \x01(\t\"j\n\tEmojiData\x12\n\n\x02id\x18\x01 \x01(\x06\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x10\n\x08\x61nimated\x18\x03 \x01(\x08\x12\x0f\n\x07managed\x18\x04 \x01(\x08\x12\x11\n\tavailable\x18\x05 \x01(\x08\x12\r\n\x05roles\x18\x06 \x03(\x06\"\xbc\x03\n\x0b\x43hannelData\x12\n\n\x02id\x18\x01 \x01(\x06\x12\x10\n\x08guild_id\x18\x02 \x01(\x06\x12\x0c\n\x04name\x18\x03 \x01(\t\x12\x1a\n\x04type\x18\x04 \x01(\x0e\x32\x0c.ChannelType\x12\x0c\n\x04nsfw\x18\x05 \x01(\x08\x12\x10\n\x08position\x18\x06 \x01(\x05\x12\x1b\n\x13rate_limit_per_user\x18\x07 \x01(\r\x12J\n\x15permission_overwrites\x18\x08 \x03(\x0b\x32+.ChannelData.ChannelPermissionOverwriteData\x1a\xdb\x01\n\x1e\x43hannelPermissionOverwriteData\x12\n\n\x02id\x18\x01 \x01(\x06\x12X\n\x04type\x18\x02 \x01(\x0e\x32J.ChannelData.ChannelPermissionOverwriteData.ChannelPermissionOverwriteType\x12\r\n\x05\x61llow\x18\x03 \x01(\x04\x12\x0c\n\x04\x64\x65ny\x18\x04 \x01(\x04\"6\n\x1e\x43hannelPermissionOverwriteType\x12\x08\n\x04ROLE\x10\x00\x12\n\n\x06MEMBER\x10\x01\"\x84\x01\n\nThreadData\x12\n\n\x02id\x18\x01 \x01(\x06\x12\x10\n\x08guild_id\x18\x02 \x01(\x06\x12\x11\n\tparent_id\x18\x03 \x01(\x06\x12\x0c\n\x04name\x18\x04 \x01(\t\x12\x1a\n\x04type\x18\x05 \x01(\x0e\x32\x0c.ChannelType\x12\x1b\n\x13rate_limit_per_user\x18\x06 \x01(\r*\x81\x02\n\x0b\x43hannelType\x12\x0e\n\nGUILD_TEXT\x10\x00\x12\x06\n\x02\x44M\x10\x01\x12\x0f\n\x0bGUILD_VOICE\x10\x02\x12\x0c\n\x08GROUP_DM\x10\x03\x12\x12\n\x0eGUILD_CATEGORY\x10\x04\x12\x0e\n\nGUILD_NEWS\x10\x05\x12\x0f\n\x0bGUILD_STORE\x10\x06\x12\x11\n\rPUBLIC_THREAD\x10\x07\x12\x12\n\x0ePRIVATE_THREAD\x10\x08\x12\x15\n\x11GUILD_STAGE_VOICE\x10\t\x12\x15\n\x11GUILD_NEWS_THREAD\x10\n\x12\x17\n\x13GUILD_PUBLIC_THREAD\x10\x0b\x12\x18\n\x14GUILD_PRIVATE_THREAD\x10\x0c\x62\x06proto3')
 )
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
-
-
-_CHANNELDATA_CHANNELPERMISSIONOVERWRITEDATA_CHANNELPERMISSIONOVERWRITETYPE = _descriptor.EnumDescriptor(
-  name='ChannelPermissionOverwriteType',
-  full_name='ChannelData.ChannelPermissionOverwriteData.ChannelPermissionOverwriteType',
-  filename=None,
-  file=DESCRIPTOR,
-  values=[
-    _descriptor.EnumValueDescriptor(
-      name='ROLE', index=0, number=0,
-      options=None,
-      type=None),
-    _descriptor.EnumValueDescriptor(
-      name='MEMBER', index=1, number=1,
-      options=None,
-      type=None),
-  ],
-  containing_type=None,
-  options=None,
-  serialized_start=660,
-  serialized_end=714,
-)
-_sym_db.RegisterEnumDescriptor(_CHANNELDATA_CHANNELPERMISSIONOVERWRITEDATA_CHANNELPERMISSIONOVERWRITETYPE)
-
-_CHANNELDATA_CHANNELTYPE = _descriptor.EnumDescriptor(
+_CHANNELTYPE = _descriptor.EnumDescriptor(
   name='ChannelType',
-  full_name='ChannelData.ChannelType',
+  full_name='ChannelType',
   filename=None,
   file=DESCRIPTOR,
   values=[
@@ -93,13 +70,63 @@ _CHANNELDATA_CHANNELTYPE = _descriptor.EnumDescriptor(
       name='GUILD_STAGE_VOICE', index=9, number=9,
       options=None,
       type=None),
+    _descriptor.EnumValueDescriptor(
+      name='GUILD_NEWS_THREAD', index=10, number=10,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='GUILD_PUBLIC_THREAD', index=11, number=11,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='GUILD_PRIVATE_THREAD', index=12, number=12,
+      options=None,
+      type=None),
   ],
   containing_type=None,
   options=None,
-  serialized_start=717,
-  serialized_end=900,
+  serialized_start=840,
+  serialized_end=1097,
 )
-_sym_db.RegisterEnumDescriptor(_CHANNELDATA_CHANNELTYPE)
+_sym_db.RegisterEnumDescriptor(_CHANNELTYPE)
+
+ChannelType = enum_type_wrapper.EnumTypeWrapper(_CHANNELTYPE)
+GUILD_TEXT = 0
+DM = 1
+GUILD_VOICE = 2
+GROUP_DM = 3
+GUILD_CATEGORY = 4
+GUILD_NEWS = 5
+GUILD_STORE = 6
+PUBLIC_THREAD = 7
+PRIVATE_THREAD = 8
+GUILD_STAGE_VOICE = 9
+GUILD_NEWS_THREAD = 10
+GUILD_PUBLIC_THREAD = 11
+GUILD_PRIVATE_THREAD = 12
+
+
+_CHANNELDATA_CHANNELPERMISSIONOVERWRITEDATA_CHANNELPERMISSIONOVERWRITETYPE = _descriptor.EnumDescriptor(
+  name='ChannelPermissionOverwriteType',
+  full_name='ChannelData.ChannelPermissionOverwriteData.ChannelPermissionOverwriteType',
+  filename=None,
+  file=DESCRIPTOR,
+  values=[
+    _descriptor.EnumValueDescriptor(
+      name='ROLE', index=0, number=0,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='MEMBER', index=1, number=1,
+      options=None,
+      type=None),
+  ],
+  containing_type=None,
+  options=None,
+  serialized_start=648,
+  serialized_end=702,
+)
+_sym_db.RegisterEnumDescriptor(_CHANNELDATA_CHANNELPERMISSIONOVERWRITEDATA_CHANNELPERMISSIONOVERWRITETYPE)
 
 
 _ROLEDATA = _descriptor.Descriptor(
@@ -289,8 +316,8 @@ _CHANNELDATA_CHANNELPERMISSIONOVERWRITEDATA = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=495,
-  serialized_end=714,
+  serialized_start=483,
+  serialized_end=702,
 )
 
 _CHANNELDATA = _descriptor.Descriptor(
@@ -361,7 +388,6 @@ _CHANNELDATA = _descriptor.Descriptor(
   ],
   nested_types=[_CHANNELDATA_CHANNELPERMISSIONOVERWRITEDATA, ],
   enum_types=[
-    _CHANNELDATA_CHANNELTYPE,
   ],
   options=None,
   is_extendable=False,
@@ -370,18 +396,86 @@ _CHANNELDATA = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=258,
-  serialized_end=900,
+  serialized_end=702,
+)
+
+
+_THREADDATA = _descriptor.Descriptor(
+  name='ThreadData',
+  full_name='ThreadData',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='id', full_name='ThreadData.id', index=0,
+      number=1, type=6, cpp_type=4, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='guild_id', full_name='ThreadData.guild_id', index=1,
+      number=2, type=6, cpp_type=4, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='parent_id', full_name='ThreadData.parent_id', index=2,
+      number=3, type=6, cpp_type=4, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='name', full_name='ThreadData.name', index=3,
+      number=4, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='type', full_name='ThreadData.type', index=4,
+      number=5, type=14, cpp_type=8, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='rate_limit_per_user', full_name='ThreadData.rate_limit_per_user', index=5,
+      number=6, type=13, cpp_type=3, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=705,
+  serialized_end=837,
 )
 
 _CHANNELDATA_CHANNELPERMISSIONOVERWRITEDATA.fields_by_name['type'].enum_type = _CHANNELDATA_CHANNELPERMISSIONOVERWRITEDATA_CHANNELPERMISSIONOVERWRITETYPE
 _CHANNELDATA_CHANNELPERMISSIONOVERWRITEDATA.containing_type = _CHANNELDATA
 _CHANNELDATA_CHANNELPERMISSIONOVERWRITEDATA_CHANNELPERMISSIONOVERWRITETYPE.containing_type = _CHANNELDATA_CHANNELPERMISSIONOVERWRITEDATA
-_CHANNELDATA.fields_by_name['type'].enum_type = _CHANNELDATA_CHANNELTYPE
+_CHANNELDATA.fields_by_name['type'].enum_type = _CHANNELTYPE
 _CHANNELDATA.fields_by_name['permission_overwrites'].message_type = _CHANNELDATA_CHANNELPERMISSIONOVERWRITEDATA
-_CHANNELDATA_CHANNELTYPE.containing_type = _CHANNELDATA
+_THREADDATA.fields_by_name['type'].enum_type = _CHANNELTYPE
 DESCRIPTOR.message_types_by_name['RoleData'] = _ROLEDATA
 DESCRIPTOR.message_types_by_name['EmojiData'] = _EMOJIDATA
 DESCRIPTOR.message_types_by_name['ChannelData'] = _CHANNELDATA
+DESCRIPTOR.message_types_by_name['ThreadData'] = _THREADDATA
+DESCRIPTOR.enum_types_by_name['ChannelType'] = _CHANNELTYPE
 
 RoleData = _reflection.GeneratedProtocolMessageType('RoleData', (_message.Message,), dict(
   DESCRIPTOR = _ROLEDATA,
@@ -411,6 +505,13 @@ ChannelData = _reflection.GeneratedProtocolMessageType('ChannelData', (_message.
   ))
 _sym_db.RegisterMessage(ChannelData)
 _sym_db.RegisterMessage(ChannelData.ChannelPermissionOverwriteData)
+
+ThreadData = _reflection.GeneratedProtocolMessageType('ThreadData', (_message.Message,), dict(
+  DESCRIPTOR = _THREADDATA,
+  __module__ = 'discord_pb2'
+  # @@protoc_insertion_point(class_scope:ThreadData)
+  ))
+_sym_db.RegisterMessage(ThreadData)
 
 
 # @@protoc_insertion_point(module_scope)

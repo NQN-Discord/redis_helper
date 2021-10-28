@@ -1,5 +1,21 @@
 syntax = "proto3";
 
+enum ChannelType {
+  GUILD_TEXT = 0;
+  DM = 1;
+  GUILD_VOICE = 2;
+  GROUP_DM = 3;
+  GUILD_CATEGORY = 4;
+  GUILD_NEWS = 5;
+  GUILD_STORE = 6;
+  PUBLIC_THREAD = 7;
+  PRIVATE_THREAD = 8;
+  GUILD_STAGE_VOICE = 9;
+  GUILD_NEWS_THREAD	= 10;
+  GUILD_PUBLIC_THREAD =	11;
+  GUILD_PRIVATE_THREAD = 12;
+}
+
 message RoleData {
   fixed64 id = 1;
   int32 position = 2;
@@ -30,18 +46,6 @@ message ChannelData {
   uint32 rate_limit_per_user = 7;
   repeated ChannelPermissionOverwriteData permission_overwrites = 8;
 
-  enum ChannelType {
-    GUILD_TEXT = 0;
-    DM = 1;
-    GUILD_VOICE = 2;
-    GROUP_DM = 3;
-    GUILD_CATEGORY = 4;
-    GUILD_NEWS = 5;
-    GUILD_STORE = 6;
-    PUBLIC_THREAD = 7;
-    PRIVATE_THREAD = 8;
-    GUILD_STAGE_VOICE = 9;
-  }
 
   message ChannelPermissionOverwriteData {
     fixed64 id = 1;
@@ -54,4 +58,13 @@ message ChannelData {
       MEMBER = 1;
     }
   }
+}
+
+message ThreadData {
+  fixed64 id = 1;
+  fixed64 guild_id = 2;
+  fixed64 parent_id = 3;
+  string name = 4;
+  ChannelType type = 5;
+  uint32 rate_limit_per_user = 6;
 }

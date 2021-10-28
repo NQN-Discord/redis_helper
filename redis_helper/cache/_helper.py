@@ -1,5 +1,6 @@
-from typing import Awaitable, Tuple
-from ..protobuf.discord_pb2 import RoleData, ChannelData, EmojiData
+from typing import Awaitable, Tuple, Optional
+from ..protobuf.discord_pb2 import RoleData, ChannelData, EmojiData, ThreadData
+from google.protobuf.json_format import MessageToDict
 
 GUILD_ATTRS = ("name", "icon", "owner_id", "joined_at", "member_count", "system_channel_id", "premium_tier")
 
@@ -40,21 +41,43 @@ def parse_channels(tr, guild_id, channels):
     if not channels:
         return
     return tr.hmset_dict(f"channels-{guild_id}", {channel["id"]:  ChannelData(
-            id=int(channel["id"]),
+        id=int(channel["id"]),
+        name=channel["name"],
+        type=channel["type"],
+        rate_limit_per_user=channel.get("rate_limit_per_user"),
+        position=channel["position"],
+        permission_overwrites=(
+            ChannelData.ChannelPermissionOverwriteData(
+                type=overwrite["type"],
+                id=int(overwrite["id"]),
+                deny=int(overwrite["deny"]),
+                allow=int(overwrite["allow"]),
+            )
+            for overwrite in channel["permission_overwrites"]
+        ),
+    ).SerializeToString() for channel in channels})
+
+
+def parse_thread(tr, guild_id, channel, expire: int):
+    return tr.set(
+        f"channels-{guild_id}-{channel['id']}",
+        ThreadData(
+            id=channel["id"],
+            guild_id=channel["guild_id"],
+            parent_id=channel["parent_id"],
             name=channel["name"],
             type=channel["type"],
-            rate_limit_per_user=channel.get("rate_limit_per_user"),
-            position=channel["position"],
-            permission_overwrites=(
-                ChannelData.ChannelPermissionOverwriteData(
-                    type=overwrite["type"],
-                    id=int(overwrite["id"]),
-                    deny=int(overwrite["deny"]),
-                    allow=int(overwrite["allow"]),
-                )
-                for overwrite in channel["permission_overwrites"]
-            ),
-        ).SerializeToString() for channel in channels})
+            rate_limit_per_user=channel["rate_limit_per_user"],
+        ).SerializeToString(),
+        expire=expire
+    )
+
+
+async def fetch_thread(redis, guild_id: int, thread_id: int) -> Optional[dict]:
+    thread = await redis.get(f"channels-{guild_id}-{thread_id}", encoding=None)
+    if thread:
+        thread_model = MessageToDict(ThreadData.FromString(thread), preserving_proto_field_name=True, use_integers_for_enums=True, including_default_value_fields=True)
+        return thread_model
 
 
 def parse_emojis(tr, guild_id, emojis):

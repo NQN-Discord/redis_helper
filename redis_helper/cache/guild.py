@@ -59,23 +59,6 @@ async def assign(redis: Redis, guild):
     await tr.execute()
 
 
-async def fetch_guild_emojis_only(redis: Redis, guild_ids: List[int]):
-    tr = redis.pipeline()
-    futures = {}
-    for guild_id in guild_ids:
-        futures[guild_id] = {
-            "emojis": tr.hgetall(f"emojis-{guild_id}", encoding=None)
-        }
-    await tr.execute()
-    del tr
-
-    for guild_id in guild_ids:
-        yield {
-            "emojis": _parse_id_dict(await futures[guild_id]["emojis"]),
-            "id": guild_id
-        }
-
-
 async def fetch_guild(redis: Redis, guild_id: int, user=None):
     async for guild in fetch_guilds(redis, guild_ids=[guild_id], user=user, emojis=True):
         return guild
@@ -114,8 +97,8 @@ async def fetch_guilds(redis: Redis, guild_ids: List[int], user, emojis: bool = 
             guild["emojis"] = load_emojis(await futures[guild_id]["emojis"])
         for channel in guild["channels"]:
             channel.pop("topic", None)
-        guild["member_count"] = int(guild.get("member_count", "0"))
-        guild["system_channel_id"] = guild.get("system_channel_id") or None
+        guild["member_count"] = 0
+        guild["system_channel_id"] = None
         guild["premium_tier"] = int(guild.get("premium_tier", "0") or "0")
         guild["icon"] = guild.get("icon") or None
         try:
