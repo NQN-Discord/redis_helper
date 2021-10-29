@@ -40,35 +40,16 @@ def parse_channels(tr, guild_id, channels):
 
     if not channels:
         return
-    return tr.hmset_dict(f"channels-{guild_id}", {channel["id"]:  ChannelData(
-        id=int(channel["id"]),
-        name=channel["name"],
-        type=channel["type"],
-        rate_limit_per_user=channel.get("rate_limit_per_user"),
-        position=channel["position"],
-        permission_overwrites=(
-            ChannelData.ChannelPermissionOverwriteData(
-                type=overwrite["type"],
-                id=int(overwrite["id"]),
-                deny=int(overwrite["deny"]),
-                allow=int(overwrite["allow"]),
-            )
-            for overwrite in channel["permission_overwrites"]
-        ),
-    ).SerializeToString() for channel in channels})
+    return tr.hmset_dict(
+        f"channels-{guild_id}",
+        {channel["id"]: _serialise_channel(channel).SerializeToString() for channel in channels}
+    )
 
 
 def parse_thread(tr, guild_id, channel, expire: int):
     return tr.set(
         f"channels-{guild_id}-{channel['id']}",
-        ThreadData(
-            id=channel["id"],
-            guild_id=channel["guild_id"],
-            parent_id=channel["parent_id"],
-            name=channel["name"],
-            type=channel["type"],
-            rate_limit_per_user=channel["rate_limit_per_user"],
-        ).SerializeToString(),
+        _serialise_thread(channel).SerializeToString(),
         expire=expire
     )
 
@@ -90,3 +71,31 @@ def parse_emojis(tr, guild_id, emojis):
             animated=emoji["animated"],
             roles=(int(i) for i in emoji["roles"]),
         ).SerializeToString() for emoji in emojis})
+
+
+def _serialise_channel(channel):
+    return ChannelData(
+        id=int(channel["id"]),
+        name=channel["name"],
+        type=channel["type"],
+        rate_limit_per_user=channel.get("rate_limit_per_user"),
+        position=channel["position"],
+        permission_overwrites=(
+            ChannelData.ChannelPermissionOverwriteData(
+                type=overwrite["type"],
+                id=int(overwrite["id"]),
+                deny=int(overwrite["deny"]),
+                allow=int(overwrite["allow"]),
+            )
+            for overwrite in channel["permission_overwrites"]
+        )
+    )
+
+
+def _serialise_thread(thread):
+    return ThreadData(
+        id=thread["id"],
+        name=thread["name"],
+        type=thread["type"],
+        parent_id=thread["parent_id"]
+    )

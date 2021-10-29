@@ -38,7 +38,7 @@ message EmojiData {
 
 message ChannelData {
   fixed64 id = 1;
-  fixed64 guild_id = 2;
+  fixed64 guild_id = 2; // Unused
   string name = 3;
   ChannelType type = 4;
   bool nsfw = 5;
@@ -62,9 +62,7 @@ message ChannelData {
 
 message ThreadData {
   fixed64 id = 1;
-  fixed64 guild_id = 2;
-  fixed64 parent_id = 3;
-  string name = 4;
-  ChannelType type = 5;
-  uint32 rate_limit_per_user = 6;
+  fixed64 parent_id = 2;
+  string name = 3;
+  ChannelType type = 4;
 }
