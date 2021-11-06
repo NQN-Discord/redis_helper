@@ -1,5 +1,8 @@
 from setuptools import setup, find_packages
 
+# pip install rma
+# rma -s redis_cache -x -
+
 
 setup(
    name="redis_helper",
