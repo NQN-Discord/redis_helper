@@ -1,9 +1,10 @@
 from typing import Iterator, List
 from itertools import chain
 from aioredis import Redis
-from ..protobuf.discord_pb2 import RoleData, ChannelData, EmojiData
+from ..protobuf.discord_pb2 import RoleData, ChannelData
 from ._helper import guild_keys, GUILD_ATTRS, parse_roles, parse_emojis, parse_channels
 from google.protobuf.json_format import MessageToDict
+from .emoji import load_emojis
 
 
 async def fetch_guild_ids(redis: Redis) -> List[int]:
@@ -114,10 +115,6 @@ def load_roles(d):
         if r["bot_id"]:
             r["tags"] = {"bot_id": r["bot_id"]}
     return roles
-
-
-def load_emojis(d):
-    return [MessageToDict(EmojiData.FromString(v), preserving_proto_field_name=True, use_integers_for_enums=True, including_default_value_fields=True) for v in d.values()]
 
 
 def load_channels(d):

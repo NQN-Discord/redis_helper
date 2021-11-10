@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 # pip install rma
-# rma -s redis_cache -x -
+# docker exec -it ... rma -s redis_cache -x -
 
 
 setup(
