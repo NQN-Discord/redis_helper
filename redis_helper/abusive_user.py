@@ -7,7 +7,7 @@ async def count(redis: Redis) -> int:
 
 
 async def exists(redis: Redis, user: int) -> bool:
-    return await redis.sismember("message-repost-abusive-users", user)
+    return bool(await redis.sismember("message-repost-abusive-users", user))
 
 
 async def create(redis: Redis, user: int, *users: int) -> NoReturn:
