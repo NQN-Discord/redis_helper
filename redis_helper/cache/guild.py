@@ -29,9 +29,13 @@ async def delete(redis: Redis, guild_id: int):
     await tr.execute()
 
 
-async def assign(redis: Redis, guild):
+async def assign(redis: Redis, guild) -> bool:
+    """
+    Returns if the guild exists already
+    """
     guild_id = guild["id"]
     tr = redis.multi_exec()
+    guild_exists = tr.sismember("guilds", guild_id)
     tr.sadd("guilds", guild_id)
     guild_attrs = {k: guild.get(k) or "" for k in GUILD_ATTRS if k in guild}
     if "system_channel_id" not in guild:
@@ -58,6 +62,7 @@ async def assign(redis: Redis, guild):
     parse_emojis(tr, guild_id, guild["emojis"])
 
     await tr.execute()
+    return bool(await guild_exists)
 
 
 async def fetch_guild(redis: Redis, guild_id: int, user=None):
