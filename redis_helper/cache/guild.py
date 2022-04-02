@@ -5,7 +5,7 @@ from ..protobuf.discord_pb2 import RoleData, ChannelData
 from ._helper import guild_keys, GUILD_ATTRS, parse_roles, parse_emojis, parse_channels
 from google.protobuf.json_format import MessageToDict
 from .emoji import load_emojis
-from .bot import _assign_member
+from .bot import _assign_member, get_member
 
 
 async def fetch_guild_ids(redis: Redis) -> List[int]:
@@ -70,8 +70,7 @@ async def fetch_guilds(redis: Redis, guild_ids: List[int], user, emojis: bool = 
         "channels": tr.hgetall,
         "roles": tr.hgetall,
         "guild": tr.hgetall,
-        "me": tr.smembers,
-        "nick": tr.get
+        "mem": tr.get
     }
     if emojis:
         attrs["emojis"] = tr.hgetall
@@ -81,14 +80,12 @@ async def fetch_guilds(redis: Redis, guild_ids: List[int], user, emojis: bool = 
     await tr.execute()
     del tr
     for guild_id in guild_ids:
-        nick = await futures[guild_id]["nick"]
         guild = {
             "channels": load_channels(await futures[guild_id]["channels"]),
             "roles": load_roles(await futures[guild_id]["roles"]),
             "members": [{
                 "user": user,
-                "roles": [int(r) for r in await futures[guild_id]["me"]],
-                "nick": None if nick is None else nick.decode("utf-8")
+                **get_member(await futures[guild_id]["mem"])
             }],
             "id": guild_id,
             **{k.decode("utf-8"): v.decode("utf-8") for k, v in (await futures[guild_id]["guild"]).items()},

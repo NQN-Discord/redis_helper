@@ -1,8 +1,9 @@
 from aioredis import Redis
-from datetime import datetime
+from datetime import datetime, timezone
 from math import ceil
 import msgpack
 from ..protobuf.discord_pb2 import MeMemberData
+from google.protobuf.json_format import MessageToDict
 
 
 async def assign_me(redis: Redis, user):
@@ -27,16 +28,6 @@ def _assign_member(tr, guild_id, member):
     if communication_disabled_until:
         # Convert to seconds past epoch, rounding up milliseconds.
         communication_disabled_until = int(ceil(datetime.fromisoformat(communication_disabled_until).timestamp()))
-
-    tr.delete(f"me-{guild_id}")
-    if roles:
-        tr.sadd(f"me-{guild_id}", *roles)
-
-    if nick:
-        tr.set(f"nick-{guild_id}", nick)
-    else:
-        tr.delete(f"nick-{guild_id}")
-
     tr.set(
         f"mem-{guild_id}",
         MeMemberData(
@@ -46,5 +37,10 @@ def _assign_member(tr, guild_id, member):
         ).SerializeToString())
 
 
-def get_member(tr, future):
-    pass
+def get_member(member_bytes: bytes):
+    member_data = MessageToDict(MeMemberData.FromString(member_bytes), preserving_proto_field_name=True, use_integers_for_enums=True, including_default_value_fields=True)
+    member_data["communication_disabled_until"] = datetime.fromtimestamp(
+        int(member_data["communication_disabled_until"]),
+        tz=timezone.utc
+    ).isoformat()
+    return member_data
