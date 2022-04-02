@@ -35,7 +35,6 @@ message EmojiData {
   repeated fixed64 roles = 6;
 }
 
-
 message ChannelData {
   fixed64 id = 1;
   fixed64 guild_id = 2; // Unused
@@ -65,4 +64,10 @@ message ThreadData {
   fixed64 parent_id = 2;
   string name = 3;
   ChannelType type = 4;
+}
+
+message MeMemberData {
+  repeated fixed64 roles = 1;
+  string nick = 2;
+  int64 communication_disabled_until = 3;
 }

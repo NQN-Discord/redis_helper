@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='discord.proto',
   package='',
   syntax='proto3',
-  serialized_pb=_b('\n\rdiscord.proto\"\x81\x01\n\x08RoleData\x12\n\n\x02id\x18\x01 \x01(\x06\x12\x10\n\x08position\x18\x02 \x01(\x05\x12\x13\n\x0bpermissions\x18\x03 \x01(\x04\x12\x13\n\x0bmentionable\x18\x04 \x01(\x08\x12\x0f\n\x07managed\x18\x05 \x01(\x08\x12\x0e\n\x06\x62ot_id\x18\x06 \x01(\x06\x12\x0c\n\x04name\x18\x07 \x01(\t\"j\n\tEmojiData\x12\n\n\x02id\x18\x01 \x01(\x06\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x10\n\x08\x61nimated\x18\x03 \x01(\x08\x12\x0f\n\x07managed\x18\x04 \x01(\x08\x12\x11\n\tavailable\x18\x05 \x01(\x08\x12\r\n\x05roles\x18\x06 \x03(\x06\"\xbc\x03\n\x0b\x43hannelData\x12\n\n\x02id\x18\x01 \x01(\x06\x12\x10\n\x08guild_id\x18\x02 \x01(\x06\x12\x0c\n\x04name\x18\x03 \x01(\t\x12\x1a\n\x04type\x18\x04 \x01(\x0e\x32\x0c.ChannelType\x12\x0c\n\x04nsfw\x18\x05 \x01(\x08\x12\x10\n\x08position\x18\x06 \x01(\x05\x12\x1b\n\x13rate_limit_per_user\x18\x07 \x01(\r\x12J\n\x15permission_overwrites\x18\x08 \x03(\x0b\x32+.ChannelData.ChannelPermissionOverwriteData\x1a\xdb\x01\n\x1e\x43hannelPermissionOverwriteData\x12\n\n\x02id\x18\x01 \x01(\x06\x12X\n\x04type\x18\x02 \x01(\x0e\x32J.ChannelData.ChannelPermissionOverwriteData.ChannelPermissionOverwriteType\x12\r\n\x05\x61llow\x18\x03 \x01(\x04\x12\x0c\n\x04\x64\x65ny\x18\x04 \x01(\x04\"6\n\x1e\x43hannelPermissionOverwriteType\x12\x08\n\x04ROLE\x10\x00\x12\n\n\x06MEMBER\x10\x01\"\x84\x01\n\nThreadData\x12\n\n\x02id\x18\x01 \x01(\x06\x12\x10\n\x08guild_id\x18\x02 \x01(\x06\x12\x11\n\tparent_id\x18\x03 \x01(\x06\x12\x0c\n\x04name\x18\x04 \x01(\t\x12\x1a\n\x04type\x18\x05 \x01(\x0e\x32\x0c.ChannelType\x12\x1b\n\x13rate_limit_per_user\x18\x06 \x01(\r*\x81\x02\n\x0b\x43hannelType\x12\x0e\n\nGUILD_TEXT\x10\x00\x12\x06\n\x02\x44M\x10\x01\x12\x0f\n\x0bGUILD_VOICE\x10\x02\x12\x0c\n\x08GROUP_DM\x10\x03\x12\x12\n\x0eGUILD_CATEGORY\x10\x04\x12\x0e\n\nGUILD_NEWS\x10\x05\x12\x0f\n\x0bGUILD_STORE\x10\x06\x12\x11\n\rPUBLIC_THREAD\x10\x07\x12\x12\n\x0ePRIVATE_THREAD\x10\x08\x12\x15\n\x11GUILD_STAGE_VOICE\x10\t\x12\x15\n\x11GUILD_NEWS_THREAD\x10\n\x12\x17\n\x13GUILD_PUBLIC_THREAD\x10\x0b\x12\x18\n\x14GUILD_PRIVATE_THREAD\x10\x0c\x62\x06proto3')
+  serialized_pb=_b('\n\rdiscord.proto\"\x81\x01\n\x08RoleData\x12\n\n\x02id\x18\x01 \x01(\x06\x12\x10\n\x08position\x18\x02 \x01(\x05\x12\x13\n\x0bpermissions\x18\x03 \x01(\x04\x12\x13\n\x0bmentionable\x18\x04 \x01(\x08\x12\x0f\n\x07managed\x18\x05 \x01(\x08\x12\x0e\n\x06\x62ot_id\x18\x06 \x01(\x06\x12\x0c\n\x04name\x18\x07 \x01(\t\"j\n\tEmojiData\x12\n\n\x02id\x18\x01 \x01(\x06\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x10\n\x08\x61nimated\x18\x03 \x01(\x08\x12\x0f\n\x07managed\x18\x04 \x01(\x08\x12\x11\n\tavailable\x18\x05 \x01(\x08\x12\r\n\x05roles\x18\x06 \x03(\x06\"\xbc\x03\n\x0b\x43hannelData\x12\n\n\x02id\x18\x01 \x01(\x06\x12\x10\n\x08guild_id\x18\x02 \x01(\x06\x12\x0c\n\x04name\x18\x03 \x01(\t\x12\x1a\n\x04type\x18\x04 \x01(\x0e\x32\x0c.ChannelType\x12\x0c\n\x04nsfw\x18\x05 \x01(\x08\x12\x10\n\x08position\x18\x06 \x01(\x05\x12\x1b\n\x13rate_limit_per_user\x18\x07 \x01(\r\x12J\n\x15permission_overwrites\x18\x08 \x03(\x0b\x32+.ChannelData.ChannelPermissionOverwriteData\x1a\xdb\x01\n\x1e\x43hannelPermissionOverwriteData\x12\n\n\x02id\x18\x01 \x01(\x06\x12X\n\x04type\x18\x02 \x01(\x0e\x32J.ChannelData.ChannelPermissionOverwriteData.ChannelPermissionOverwriteType\x12\r\n\x05\x61llow\x18\x03 \x01(\x04\x12\x0c\n\x04\x64\x65ny\x18\x04 \x01(\x04\"6\n\x1e\x43hannelPermissionOverwriteType\x12\x08\n\x04ROLE\x10\x00\x12\n\n\x06MEMBER\x10\x01\"U\n\nThreadData\x12\n\n\x02id\x18\x01 \x01(\x06\x12\x11\n\tparent_id\x18\x02 \x01(\x06\x12\x0c\n\x04name\x18\x03 \x01(\t\x12\x1a\n\x04type\x18\x04 \x01(\x0e\x32\x0c.ChannelType\"Q\n\x0cMeMemberData\x12\r\n\x05roles\x18\x01 \x03(\x06\x12\x0c\n\x04nick\x18\x02 \x01(\t\x12$\n\x1c\x63ommunication_disabled_until\x18\x03 \x01(\x03*\x81\x02\n\x0b\x43hannelType\x12\x0e\n\nGUILD_TEXT\x10\x00\x12\x06\n\x02\x44M\x10\x01\x12\x0f\n\x0bGUILD_VOICE\x10\x02\x12\x0c\n\x08GROUP_DM\x10\x03\x12\x12\n\x0eGUILD_CATEGORY\x10\x04\x12\x0e\n\nGUILD_NEWS\x10\x05\x12\x0f\n\x0bGUILD_STORE\x10\x06\x12\x11\n\rPUBLIC_THREAD\x10\x07\x12\x12\n\x0ePRIVATE_THREAD\x10\x08\x12\x15\n\x11GUILD_STAGE_VOICE\x10\t\x12\x15\n\x11GUILD_NEWS_THREAD\x10\n\x12\x17\n\x13GUILD_PUBLIC_THREAD\x10\x0b\x12\x18\n\x14GUILD_PRIVATE_THREAD\x10\x0c\x62\x06proto3')
 )
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
@@ -85,8 +85,8 @@ _CHANNELTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=840,
-  serialized_end=1097,
+  serialized_start=875,
+  serialized_end=1132,
 )
 _sym_db.RegisterEnumDescriptor(_CHANNELTYPE)
 
@@ -415,36 +415,22 @@ _THREADDATA = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='guild_id', full_name='ThreadData.guild_id', index=1,
+      name='parent_id', full_name='ThreadData.parent_id', index=1,
       number=2, type=6, cpp_type=4, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='parent_id', full_name='ThreadData.parent_id', index=2,
-      number=3, type=6, cpp_type=4, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='name', full_name='ThreadData.name', index=3,
-      number=4, type=9, cpp_type=9, label=1,
+      name='name', full_name='ThreadData.name', index=2,
+      number=3, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='type', full_name='ThreadData.type', index=4,
-      number=5, type=14, cpp_type=8, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='rate_limit_per_user', full_name='ThreadData.rate_limit_per_user', index=5,
-      number=6, type=13, cpp_type=3, label=1,
+      name='type', full_name='ThreadData.type', index=3,
+      number=4, type=14, cpp_type=8, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -461,8 +447,53 @@ _THREADDATA = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=705,
-  serialized_end=837,
+  serialized_start=704,
+  serialized_end=789,
+)
+
+
+_MEMEMBERDATA = _descriptor.Descriptor(
+  name='MeMemberData',
+  full_name='MeMemberData',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='roles', full_name='MeMemberData.roles', index=0,
+      number=1, type=6, cpp_type=4, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='nick', full_name='MeMemberData.nick', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='communication_disabled_until', full_name='MeMemberData.communication_disabled_until', index=2,
+      number=3, type=3, cpp_type=2, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=791,
+  serialized_end=872,
 )
 
 _CHANNELDATA_CHANNELPERMISSIONOVERWRITEDATA.fields_by_name['type'].enum_type = _CHANNELDATA_CHANNELPERMISSIONOVERWRITEDATA_CHANNELPERMISSIONOVERWRITETYPE
@@ -475,6 +506,7 @@ DESCRIPTOR.message_types_by_name['RoleData'] = _ROLEDATA
 DESCRIPTOR.message_types_by_name['EmojiData'] = _EMOJIDATA
 DESCRIPTOR.message_types_by_name['ChannelData'] = _CHANNELDATA
 DESCRIPTOR.message_types_by_name['ThreadData'] = _THREADDATA
+DESCRIPTOR.message_types_by_name['MeMemberData'] = _MEMEMBERDATA
 DESCRIPTOR.enum_types_by_name['ChannelType'] = _CHANNELTYPE
 
 RoleData = _reflection.GeneratedProtocolMessageType('RoleData', (_message.Message,), dict(
@@ -512,6 +544,13 @@ ThreadData = _reflection.GeneratedProtocolMessageType('ThreadData', (_message.Me
   # @@protoc_insertion_point(class_scope:ThreadData)
   ))
 _sym_db.RegisterMessage(ThreadData)
+
+MeMemberData = _reflection.GeneratedProtocolMessageType('MeMemberData', (_message.Message,), dict(
+  DESCRIPTOR = _MEMEMBERDATA,
+  __module__ = 'discord_pb2'
+  # @@protoc_insertion_point(class_scope:MeMemberData)
+  ))
+_sym_db.RegisterMessage(MeMemberData)
 
 
 # @@protoc_insertion_point(module_scope)

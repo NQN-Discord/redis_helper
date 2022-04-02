@@ -5,6 +5,7 @@ from ..protobuf.discord_pb2 import RoleData, ChannelData
 from ._helper import guild_keys, GUILD_ATTRS, parse_roles, parse_emojis, parse_channels
 from google.protobuf.json_format import MessageToDict
 from .emoji import load_emojis
+from .bot import _assign_member
 
 
 async def fetch_guild_ids(redis: Redis) -> List[int]:
@@ -48,14 +49,7 @@ async def assign(redis: Redis, guild) -> bool:
         tr.delete(f"roles-{guild_id}", f"role-perms-{guild_id}")
     if "members" in guild and guild["members"]:
         member = guild["members"][0]
-        roles = member["roles"]
-        tr.delete(f"me-{guild_id}")
-        if roles:
-            tr.sadd(f"me-{guild_id}", *roles)
-        if member.get("nick"):
-            tr.set(f"nick-{guild_id}", member["nick"])
-        else:
-            tr.delete(f"nick-{guild_id}")
+        _assign_member(tr, guild_id, member)
     parse_roles(tr, guild_id, guild["roles"])
 
     tr.delete(f"emojis-{guild_id}")
