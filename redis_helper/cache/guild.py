@@ -43,10 +43,10 @@ async def assign(redis: Redis, guild) -> bool:
         guild_attrs["system_channel_id"] = ""
     tr.hmset_dict(f"guild-{guild_id}", guild_attrs)
     if "channels" in guild:
-        tr.delete(f"roles-{guild_id}", f"role-perms-{guild_id}", f"channels-{guild_id}")
+        tr.delete(f"roles-{guild_id}" f"channels-{guild_id}")
         parse_channels(tr, guild_id, guild["channels"])
     else:
-        tr.delete(f"roles-{guild_id}", f"role-perms-{guild_id}")
+        tr.delete(f"roles-{guild_id}")
     if "members" in guild and guild["members"]:
         # Doesn't happen on guild updates, but does on guild creates for both startup and joining a guild.
         member = guild["members"][0]
@@ -59,7 +59,8 @@ async def assign(redis: Redis, guild) -> bool:
     await tr.execute()
     exists = bool(await guild_exists)
     if not exists:
-        assert "members" in guild and guild["members"]
+        if not ("members" in guild and guild["members"]):
+            raise AssertionError(guild)
     return exists
 
 
