@@ -48,6 +48,7 @@ async def assign(redis: Redis, guild) -> bool:
     else:
         tr.delete(f"roles-{guild_id}", f"role-perms-{guild_id}")
     if "members" in guild and guild["members"]:
+        # Doesn't happen on guild updates, but does on guild creates for both startup and joining a guild.
         member = guild["members"][0]
         _assign_member(tr, guild_id, member)
     parse_roles(tr, guild_id, guild["roles"])
@@ -56,7 +57,10 @@ async def assign(redis: Redis, guild) -> bool:
     parse_emojis(tr, guild_id, guild["emojis"])
 
     await tr.execute()
-    return bool(await guild_exists)
+    exists = bool(await guild_exists)
+    if not exists:
+        assert "members" in guild and guild["members"]
+    return exists
 
 
 async def fetch_guild(redis: Redis, guild_id: int, user=None):
