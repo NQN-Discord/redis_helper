@@ -1,12 +1,12 @@
 from typing import List
-from aioredis import Redis, ReplyError
+from aioredis import Redis
 from collections import defaultdict
-from hashlib import sha1
 import datetime
+from .._prepare_script import prepare_script
 
 
 EMOJI_COUNT_PER_DAY = 400
-hitters_script = f"""
+hitters_script = prepare_script(f"""
 local set = KEYS[1]
 local set_length = {EMOJI_COUNT_PER_DAY}
 
@@ -21,13 +21,12 @@ for i, key in ipairs(ARGV) do
         redis.call('ZADD', set, value[2] + 1.0, key)
     end
 end
-""".encode()
-hitters_hash = sha1(hitters_script).hexdigest()
+""")
 
 
 async def add_hashes(redis: Redis, hashes: List[str]):
     day_number = datetime.date.today().weekday()
-    await _call_function(redis, hitters_script, hitters_hash, keys=[f"emoji-heavy-hitters-{day_number}"], args=hashes)
+    await hitters_script(redis, keys=[f"emoji-heavy-hitters-{day_number}"], args=hashes)
 
 
 async def get_hashes(redis: Redis):
@@ -40,13 +39,6 @@ async def get_hashes(redis: Redis):
         for emote_hash, score in day:
             rtn[emote_hash] += score
     return sorted(rtn, key=rtn.get, reverse=True)
-
-
-async def _call_function(redis, script, script_hash, **kwargs):
-    try:
-        await redis.evalsha(script_hash, **kwargs)
-    except ReplyError:
-        await redis.eval(script, **kwargs)
 
 
 async def delete_day(redis: Redis, date):
