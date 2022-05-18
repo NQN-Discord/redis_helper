@@ -16,6 +16,8 @@ async def initialise(redis: Redis, user_id: int) -> NoReturn:
 
 
 async def add_emoji(redis: Redis, user_id: int, emoji_ids: List[int]) -> NoReturn:
+    if not emoji_ids:
+        return
     try:
         await redis.execute("TOPK.ADD", f"user-top-emojis-{user_id}", *emoji_ids)
     except ReplyError as e:
