@@ -1,4 +1,4 @@
-from typing import NoReturn, List
+from typing import NoReturn, List, Tuple
 from aioredis import Redis, ReplyError
 
 
@@ -32,3 +32,16 @@ async def list_emojis(redis: Redis, user_id: int) -> List[int]:
         if e.args != ("TopK: key does not exist",):
             raise
         return []
+
+
+async def add_guild_emojis(redis: Redis, guild_id: int, emoji_ids: List[int]):
+    if emoji_ids:
+        await redis.sadd("recently_used_emojis", *[f"{guild_id}-{e}" for e in emoji_ids])
+
+
+async def pop_all_recently_used_emojis(redis: Redis) -> List[Tuple[int, int]]:
+    tr = redis.multi_exec()
+    members = tr.smembers("recently_used_emojis")
+    tr.delete("recently_used_emojis")
+    await tr.execute()
+    return [tuple(map(int, i.split("-"))) for i in await members]
