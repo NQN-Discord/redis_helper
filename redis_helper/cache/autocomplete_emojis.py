@@ -16,6 +16,10 @@ class EmojiTypes:
     server_alias: List[str] = field(default_factory=list)
     server_pack: List[str] = field(default_factory=list)
 
+    def items(self):
+        for field in _field_names:
+            yield field, getattr(self, field)
+
 
 class EmojiSource(Flag):
     CURRENT_SERVER = auto()
@@ -80,7 +84,7 @@ async def assign(redis: Redis, user_id: int, guild_id: Optional[int], emoji_type
 
 async def reset_expire(redis: Redis, user_id: int, guild_id: Optional[int]):
     tr = redis.multi_exec()
-    tr.expire(f"autocomplete-emojis-{user_id}", expire=EXPIRE_TIME)
+    tr.expire(f"autocomplete-emojis-{user_id}", EXPIRE_TIME)
     for _, key in _get_keys(user_id, guild_id, ALL):
         tr.expire(key, EXPIRE_TIME)
     await tr.execute()
