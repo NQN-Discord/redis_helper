@@ -11,10 +11,10 @@ async def assign(redis: Redis, guild_id: int, emotes: Dict[str, str]) -> NoRetur
     if emotes:
         tr = redis.pipeline()
         hash_key = f"emote-cache-{guild_id}"
-        sorted_set_key = f"emote-cache-{guild_id}-lookup"
+        sorted_set_key = f"autocomplete-emojis-{guild_id}-recent"
         current_time = time_ns()
         tr.hmset_dict(hash_key, emotes)
-        tr.zadd(sorted_set_key, *[x for xs in zip(repeat(current_time), emotes.keys()) for x in xs])
+        tr.zadd(sorted_set_key, *[x for xs in zip(repeat(current_time), (f"{emote_name.lower()}.{emote_str}" for emote_name, emote_str in emotes.items())) for x in xs])
         await tr.execute()
         tr = redis.pipeline()
         for key in emotes:

@@ -1,3 +1,4 @@
+import asyncio
 from typing import Tuple, Optional, List
 from aioredis import Redis
 from itertools import cycle, chain
@@ -15,6 +16,7 @@ class EmojiTypes:
     # Optional for non-guild usages
     server_alias: List[str] = field(default_factory=list)
     server_pack: List[str] = field(default_factory=list)
+    server_recently_used: List[str] = field(default_factory=list)
 
     def items(self):
         for field in _field_names:
@@ -28,9 +30,10 @@ class EmojiSource(Flag):
     PACK = auto()
     SERVER_ALIAS = auto()
     SERVER_PACK = auto()
+    SERVER_RECENTLY_USED = auto()
 
 
-ALL = EmojiSource.CURRENT_SERVER | EmojiSource.ALIAS | EmojiSource.MUTUAL_SERVER | EmojiSource.PACK | EmojiSource.SERVER_ALIAS | EmojiSource.SERVER_PACK
+ALL = EmojiSource.CURRENT_SERVER | EmojiSource.ALIAS | EmojiSource.MUTUAL_SERVER | EmojiSource.PACK | EmojiSource.SERVER_ALIAS | EmojiSource.SERVER_PACK | EmojiSource.SERVER_RECENTLY_USED
 
 
 EXPIRE_TIME = 30
@@ -38,17 +41,18 @@ _field_names = [field.name for field in fields(EmojiTypes)]
 
 
 def _get_keys(user_id: int, guild_id: Optional[int], sources: EmojiSource):
-    user_ids =  [
-        (sources.CURRENT_SERVER, f"autocomplete-emojis-{user_id}-guild"),
-        (sources.ALIAS, f"autocomplete-emojis-{user_id}-alias"),
-        (sources.MUTUAL_SERVER, f"autocomplete-emojis-{user_id}-mutual"),
-        (sources.PACK, f"autocomplete-emojis-{user_id}-pack"),
+    user_ids = [
+        (sources.CURRENT_SERVER, "redis", f"autocomplete-emojis-{user_id}-guild"),
+        (sources.ALIAS, "redis", f"autocomplete-emojis-{user_id}-alias"),
+        (sources.MUTUAL_SERVER, "redis", f"autocomplete-emojis-{user_id}-mutual"),
+        (sources.PACK, "redis", f"autocomplete-emojis-{user_id}-pack"),
     ]
     guild_ids = []
     if guild_id:
         guild_ids = [
-            (sources.SERVER_ALIAS, f"autocomplete-emojis-{guild_id}-alias"),
-            (sources.SERVER_PACK, f"autocomplete-emojis-{guild_id}-pack")
+            (sources.SERVER_ALIAS, "redis", f"autocomplete-emojis-{guild_id}-alias"),
+            (sources.SERVER_PACK, "redis", f"autocomplete-emojis-{guild_id}-pack"),
+            (sources.SERVER_RECENTLY_USED, "keydb", f"autocomplete-emojis-{guild_id}-recent")
         ]
     return [*user_ids, *guild_ids]
 
@@ -57,26 +61,31 @@ async def _none():
     return []
 
 
-async def fetch(redis: Redis, user_id: int, guild_id: Optional[int], sources: EmojiSource, start: str, limit: int) -> Tuple[bool, EmojiTypes]:
-    tr = redis.multi_exec()
-    exists = tr.exists(f"autocomplete-emojis-{user_id}")
+async def fetch(redis: Redis, keydb: Redis, user_id: int, guild_id: Optional[int], sources: EmojiSource, start: str, limit: int) -> Tuple[EmojiSource, EmojiTypes]:
+    trs = {
+        "redis": redis.multi_exec(),
+        "keydb": keydb.multi_exec(),
+    }
+    exists = trs["redis"].get(f"autocomplete-emojis-{user_id}")
     encoded_prefix = start.lower().encode("utf8")
     ranges = [
-        tr.zrangebylex(key, min=encoded_prefix, offset=0, count=limit) if sources & source else _none()
-        for source, key in _get_keys(user_id, guild_id, sources)
+        trs[instance].zrangebylex(key, min=encoded_prefix, offset=0, count=limit) if sources & source else _none()
+        for source, instance, key in _get_keys(user_id, guild_id, sources)
     ]
-    await tr.execute()
+    await asyncio.gather(*[tr.execute() for tr in trs.values()])
+    exists = await exists
+    autocomplete_ranges = await gather(*ranges)
     return (
-        bool(EmojiSource(await exists) & sources),
-        EmojiTypes(*[[e.split(".", 1)[1] for e in l] for l in await gather(*ranges)])
+        EmojiSource(0 if exists is None else int(exists)) & sources,
+        EmojiTypes(*[[e.split(".", 1)[1] for e in l] for l in autocomplete_ranges])
     )
 
 
 async def assign(redis: Redis, user_id: int, guild_id: Optional[int], emoji_types: EmojiTypes, sources: EmojiSource):
     tr = redis.multi_exec()
     tr.set(f"autocomplete-emojis-{user_id}", sources.value, expire=EXPIRE_TIME)
-    for (source, key), emojis in zip(_get_keys(user_id, guild_id, sources), _get_values(emoji_types)):
-        if emojis and sources & source:
+    for (source, instance, key), emojis in zip(_get_keys(user_id, guild_id, sources), _get_values(emoji_types)):
+        if instance == "redis" and emojis and sources & source:
             tr.zadd(key, *chain(*zip(cycle([0]), (f"{emoji.name.lower()}.{emoji}" for emoji in emojis))))
             tr.expire(key, EXPIRE_TIME)
     await tr.execute()
@@ -85,8 +94,9 @@ async def assign(redis: Redis, user_id: int, guild_id: Optional[int], emoji_type
 async def reset_expire(redis: Redis, user_id: int, guild_id: Optional[int]):
     tr = redis.multi_exec()
     tr.expire(f"autocomplete-emojis-{user_id}", EXPIRE_TIME)
-    for _, key in _get_keys(user_id, guild_id, ALL):
-        tr.expire(key, EXPIRE_TIME)
+    for _, instance, key in _get_keys(user_id, guild_id, ALL):
+        if instance == "redis":
+            tr.expire(key, EXPIRE_TIME)
     await tr.execute()
 
 
