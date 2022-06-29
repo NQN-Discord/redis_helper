@@ -2,7 +2,7 @@ from typing import Awaitable, Tuple, Optional
 from ..protobuf.discord_pb2 import RoleData, ChannelData, EmojiData, ThreadData
 from google.protobuf.json_format import MessageToDict
 
-GUILD_ATTRS = ("name", "icon", "owner_id", "joined_at", "member_count", "system_channel_id", "premium_tier")
+GUILD_ATTRS = ("name", "icon", "owner_id", "joined_at", "premium_tier", "community")
 
 
 class OptionallyAwaitable:
