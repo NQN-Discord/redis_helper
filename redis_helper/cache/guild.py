@@ -39,7 +39,7 @@ async def assign(redis: Redis, guild) -> bool:
     guild_exists = tr.sismember("guilds", guild_id)
     tr.sadd("guilds", guild_id)
     guild_attrs = {k: guild.get(k) or "" for k in GUILD_ATTRS if k in guild}
-    guild_attrs["community"] = int("COMMUNITY" in guild.get("features", []))
+    guild_attrs["features"] = int("COMMUNITY" in guild.get("features", []))
     tr.hmset_dict(f"guild-{guild_id}", guild_attrs)
     if "channels" in guild:
         tr.delete(f"roles-{guild_id}" f"channels-{guild_id}")
@@ -102,7 +102,7 @@ async def fetch_guilds(redis: Redis, guild_ids: List[int], user, emojis: bool = 
         guild["system_channel_id"] = None
         guild["premium_tier"] = int(guild.get("premium_tier", "0") or "0")
         guild["icon"] = guild.get("icon") or None
-        guild["features"] = ["COMMUNITY"] if guild.pop("community") == "1" else []
+        guild["features"] = ["COMMUNITY"] if guild.get("features") == "1" else []
         try:
             guild["members"][0]["joined_at"] = guild["joined_at"]
         except KeyError:
