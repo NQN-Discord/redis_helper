@@ -30,14 +30,14 @@ message EmojiData {
   fixed64 id = 1;
   string name = 2;
   bool animated = 3;
-  bool managed = 4;
+  optional bool managed = 4;
   bool available = 5;
   repeated fixed64 roles = 6;
 }
 
 message ChannelData {
   fixed64 id = 1;
-  fixed64 guild_id = 2; // Unused
+  optional fixed64 guild_id = 2; // Unused
   string name = 3;
   ChannelType type = 4;
   bool nsfw = 5;
@@ -68,6 +68,6 @@ message ThreadData {
 
 message MeMemberData {
   repeated fixed64 roles = 1;
-  string nick = 2;
-  int64 communication_disabled_until = 3;
+  optional string nick = 2;
+  optional int64 communication_disabled_until = 3;
 }
