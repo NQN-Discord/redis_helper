@@ -78,6 +78,7 @@ def _serialise_channel(channel):
         id=int(channel["id"]),
         name=channel["name"],
         type=channel["type"],
+        nsfw=channel.get("nsfw", False),
         rate_limit_per_user=channel.get("rate_limit_per_user"),
         position=channel["position"],
         permission_overwrites=(

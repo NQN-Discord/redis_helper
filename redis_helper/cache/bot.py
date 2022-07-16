@@ -40,7 +40,7 @@ def _assign_member(tr, guild_id, member):
 def get_member(member_bytes: bytes):
     member_data = MessageToDict(MeMemberData.FromString(member_bytes or b""), preserving_proto_field_name=True, use_integers_for_enums=True, including_default_value_fields=True)
     member_data["communication_disabled_until"] = datetime.fromtimestamp(
-        int(member_data["communication_disabled_until"]),
+        int(member_data.get("communication_disabled_until", "0")),
         tz=timezone.utc
     ).isoformat()
     return member_data

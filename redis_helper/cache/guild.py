@@ -113,8 +113,9 @@ async def fetch_guilds(redis: Redis, guild_ids: List[int], user, emojis: bool = 
 def load_roles(d):
     roles = [MessageToDict(RoleData.FromString(v), preserving_proto_field_name=True, use_integers_for_enums=True, including_default_value_fields=True) for v in d.values()]
     for r in roles:
-        if r["bot_id"]:
-            r["tags"] = {"bot_id": r["bot_id"]}
+        bot_id = r.pop("bot_id", None)
+        if bot_id and bot_id != "0":
+            r["tags"] = {"bot_id": bot_id}
     return roles
 
 

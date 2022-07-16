@@ -22,7 +22,7 @@ message RoleData {
   uint64 permissions = 3;
   bool mentionable = 4;
   bool managed = 5;
-  fixed64 bot_id = 6;
+  optional fixed64 bot_id = 6;
   string name = 7;
 }
 
