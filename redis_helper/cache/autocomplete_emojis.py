@@ -34,6 +34,7 @@ class EmojiSource(Flag):
 
 
 ALL = EmojiSource.CURRENT_SERVER | EmojiSource.ALIAS | EmojiSource.MUTUAL_SERVER | EmojiSource.PACK | EmojiSource.SERVER_ALIAS | EmojiSource.SERVER_PACK | EmojiSource.SERVER_RECENTLY_USED
+CURRENT_SERVER_EXPLICIT = EmojiSource.CURRENT_SERVER | EmojiSource.SERVER_ALIAS | EmojiSource.SERVER_PACK
 
 
 EXPIRE_TIME = 30
