@@ -1,4 +1,3 @@
-import asyncio
 from typing import Tuple, Optional, List
 from aioredis import Redis
 from itertools import cycle, chain
@@ -53,6 +52,7 @@ def _get_keys(user_id: int, guild_id: Optional[int], sources: EmojiSource) -> Li
         guild_ids = [
             (sources.SERVER_ALIAS, f"autocomplete-emojis-{guild_id}-alias"),
             (sources.SERVER_PACK, f"autocomplete-emojis-{guild_id}-pack"),
+            (sources.SERVER_RECENTLY_USED, f"autocomplete-emojis-{guild_id}-recent"),
         ]
     return [*user_ids, *guild_ids]
 
