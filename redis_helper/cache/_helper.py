@@ -69,7 +69,7 @@ def parse_emojis(tr, guild_id, emojis):
             name=emoji["name"],
             available=emoji["available"],
             animated=emoji["animated"],
-            roles=(int(i) for i in emoji["roles"]),
+            roles=(int(i) for i in emoji.get("roles", ())),
         ).SerializeToString() for emoji in emojis})
 
 
