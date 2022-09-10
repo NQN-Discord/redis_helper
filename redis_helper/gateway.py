@@ -12,7 +12,7 @@ async def fetch_latency(redis) -> Dict[int, Optional[float]]:
     for k, v in latency_futures.items():
         latency = await v
         latencies[k] = latency = latency and float(latency)
-        if latency is not None and not isfinite(latency):
+        if latency in (None, "") or not isfinite(latency):
             latencies[k] = None
     return latencies
 
