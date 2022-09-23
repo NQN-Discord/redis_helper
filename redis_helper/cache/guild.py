@@ -17,16 +17,16 @@ else:
 
     hour = 3600
     day = hour * 24
-    inf = float("inf")
     last_read_time = Histogram(
         "guild_last_read_time",
         "When was the last time the bot last read the guild from the cache",
         namespace="nqn_common",
         buckets=[
+            0,
             10, 60, 120, 300, 600, 1800,
             hour, 2 * hour, 6 * hour, 12 * hour,
             day, 2 * day, 3 * day, 7 * day,
-            14 * day, 30 * day, inf
+            14 * day, 30 * day
         ]
     )
 
@@ -149,7 +149,7 @@ def load_channels(d):
 
 def _do_score_metric(tr: Redis, guild_ids: List[int]):
     def inner(future):
-        results = [inf if i is None else (current_time - float(i)) / 10**9 for i in future.result()]
+        results = [0 if i is None else (current_time - float(i)) / 10**9 for i in future.result()]
         for i in results:
             last_read_time.observe(i)
 
