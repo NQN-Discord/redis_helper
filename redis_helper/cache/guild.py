@@ -1,11 +1,33 @@
 from typing import Iterator, List
-from itertools import chain
+from itertools import chain, cycle
+import time
 from aioredis import Redis
 from ..protobuf.discord_pb2 import RoleData, ChannelData
 from ._helper import guild_keys, GUILD_ATTRS, parse_roles, parse_emojis, parse_channels
 from google.protobuf.json_format import MessageToDict
 from .emoji import load_emojis
 from .bot import _assign_member, get_member
+
+try:
+    from prometheus_client import Histogram
+except ImportError:
+    prometheus_enabled = False
+else:
+    prometheus_enabled = True
+
+    hour = 3600
+    day = hour * 24
+    last_read_time = Histogram(
+        "guild_last_read_time",
+        "When was the last time the bot last read the guild from the cache",
+        namespace="nqn_common",
+        buckets=[
+            10, 60, 120, 300, 600, 1800,
+            hour, 2 * hour, 6 * hour, 12 * hour,
+            day, 2 * day, 3 * day, 7 * day,
+            14 * day, 30 * day
+        ]
+    )
 
 
 async def fetch_guild_ids(redis: Redis) -> List[int]:
@@ -70,6 +92,7 @@ async def fetch_guild(redis: Redis, guild_id: int, user=None):
 
 async def fetch_guilds(redis: Redis, guild_ids: List[int], user, emojis: bool = False):
     tr = redis.pipeline()
+    _do_score_metric(tr, guild_ids)
     attrs = {
         "channels": tr.hgetall,
         "roles": tr.hgetall,
@@ -121,3 +144,19 @@ def load_roles(d):
 
 def load_channels(d):
     return [MessageToDict(ChannelData.FromString(v), preserving_proto_field_name=True, use_integers_for_enums=True, including_default_value_fields=True) for v in d.values()]
+
+
+def _do_score_metric(tr: Redis, guild_ids: List[int]):
+    def inner(future):
+        results = [(current_time - float(i)) / 10**9 for i in future.result() if i is not None]
+        for i in results:
+            last_read_time.observe(i)
+
+    current_time = time.time_ns()
+    if prometheus_enabled:
+        _execute(tr, "zmscore", "guild_last_read", *guild_ids).add_done_callback(inner)
+    tr.zadd("guild_last_read", *chain(*zip(cycle([current_time]), guild_ids)))
+
+
+def _execute(redis, *args):
+    return redis.__getattr__("execute")(*args)
