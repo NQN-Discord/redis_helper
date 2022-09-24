@@ -7,6 +7,7 @@ from ._helper import guild_keys, GUILD_ATTRS, parse_roles, parse_emojis, parse_c
 from google.protobuf.json_format import MessageToDict
 from .emoji import load_emojis
 from .bot import _assign_member, get_member
+from ..transaction_execute import _execute
 
 try:
     from prometheus_client import Histogram
@@ -87,21 +88,20 @@ async def assign(redis: Redis, guild) -> bool:
 
 
 async def fetch_guild(redis: Redis, guild_id: int, user=None):
-    async for guild in fetch_guilds(redis, guild_ids=[guild_id], user=user, emojis=True):
+    async for guild in fetch_guilds(redis, guild_ids=[guild_id], user=user):
         return guild
 
 
-async def fetch_guilds(redis: Redis, guild_ids: List[int], user, emojis: bool = False):
+async def fetch_guilds(redis: Redis, guild_ids: List[int], user):
     tr = redis.pipeline()
     _do_score_metric(tr, guild_ids)
     attrs = {
         "channels": tr.hgetall,
+        "emojis": tr.hgetall,
         "roles": tr.hgetall,
         "guild": tr.hgetall,
         "mem": tr.get
     }
-    if emojis:
-        attrs["emojis"] = tr.hgetall
     futures = {}
     for guild_id in guild_ids:
         futures[guild_id] = {attr: f(f"{attr}-{guild_id}", encoding=None) for attr, f in attrs.items()}
@@ -110,6 +110,7 @@ async def fetch_guilds(redis: Redis, guild_ids: List[int], user, emojis: bool = 
     for guild_id in guild_ids:
         guild = {
             "channels": load_channels(await futures[guild_id]["channels"]),
+            "emojis": load_emojis(await futures[guild_id]["emojis"]),
             "roles": load_roles(await futures[guild_id]["roles"]),
             "members": [{
                 "user": user,
@@ -118,8 +119,6 @@ async def fetch_guilds(redis: Redis, guild_ids: List[int], user, emojis: bool = 
             "id": guild_id,
             **{k.decode("utf-8"): v.decode("utf-8") for k, v in (await futures[guild_id]["guild"]).items()},
         }
-        if emojis:
-            guild["emojis"] = load_emojis(await futures[guild_id]["emojis"])
         for channel in guild["channels"]:
             channel.pop("topic", None)
         guild["member_count"] = 0
@@ -158,6 +157,3 @@ def _do_score_metric(tr: Redis, guild_ids: List[int]):
         _execute(tr, "zmscore", "guild_last_read", *guild_ids).add_done_callback(inner)
     tr.zadd("guild_last_read", *chain(*zip(cycle([current_time]), guild_ids)))
 
-
-def _execute(redis, *args):
-    return redis.__getattr__("execute")(*args)
