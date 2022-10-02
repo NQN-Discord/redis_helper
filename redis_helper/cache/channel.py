@@ -3,7 +3,7 @@ from ._helper import parse_channels, parse_thread, fetch_thread
 
 
 async def assign(redis: Redis, guild_id: int, channel):
-    await parse_channels(redis, guild_id, [channel])
+    await parse_channels(redis.hmset_dict, guild_id, [channel])
 
 
 async def assign_thread(redis: Redis, guild_id: int, channel, expire: int):

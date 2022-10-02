@@ -1,16 +1,15 @@
 from typing import List
 from aioredis import Redis
 from ._helper import parse_emojis
+from ..assign_hashmap_keep_ttl import assign_hashmap_keep_ttl, execute_transaction
 from ..protobuf.discord_pb2 import EmojiData
 from google.protobuf.json_format import MessageToDict
 
 
 async def assign(redis: Redis, guild_id: int, emojis):
     tr = redis.multi_exec()
-    tr.delete(f"emojis-{guild_id}")
-    if emojis:
-        parse_emojis(tr, guild_id, emojis)
-    await tr.execute()
+    parse_emojis(assign_hashmap_keep_ttl(tr, guild_id), guild_id, emojis)
+    await execute_transaction(tr, lambda: assign(redis, guild_id, emojis))
 
 
 async def fetch_guilds(redis: Redis, guild_ids: List[int]):

@@ -1,7 +1,12 @@
+import math
 from typing import Iterator, List
 from itertools import chain, cycle
 import time
+import math
 from aioredis import Redis
+from aioredis.commands import MultiExec
+
+from ..assign_hashmap_keep_ttl import assign_hashmap_keep_ttl, execute_transaction
 from ..protobuf.discord_pb2 import RoleData, ChannelData
 from ._helper import guild_keys, GUILD_ATTRS, parse_roles, parse_emojis, parse_channels
 from google.protobuf.json_format import MessageToDict
@@ -31,9 +36,15 @@ else:
         ]
     )
 
+TWO_DAYS_IN_MILLIS = 1000 * 60 * 60 * 24 * 2
+
 
 async def fetch_guild_ids(redis: Redis) -> List[int]:
     return [int(i) for i in await redis.smembers("guilds")]
+
+
+async def fetch_cached_guild_ids(redis: Redis) -> List[int]:
+    return [int(i) for i in await redis.zrangebyscore("guild_last_read", _get_earliest(time.time_ns()), math.inf)]
 
 
 async def intersect_shard(redis: Redis, shard_id: int, no_shards: int, keep: Iterator[int]):
@@ -44,6 +55,7 @@ async def intersect_shard(redis: Redis, shard_id: int, no_shards: int, keep: Ite
         tr = redis.multi_exec()
         tr.delete(*chain(*map(guild_keys, deleted)))
         tr.srem("guilds", *deleted)
+        tr.zrem("guild_last_read", *deleted)
         await tr.execute()
 
 
@@ -51,35 +63,52 @@ async def delete(redis: Redis, guild_id: int):
     tr = redis.multi_exec()
     tr.delete(*guild_keys(guild_id))
     tr.srem("guilds", guild_id)
+    tr.zrem("guild_last_read", guild_id)
     await tr.execute()
 
 
-async def assign(redis: Redis, guild) -> bool:
+async def assign(redis: Redis, guild, is_update: bool) -> bool:
     """
     Returns if the guild exists already
     """
     guild_id = guild["id"]
-    tr = redis.multi_exec()
+    tr: MultiExec = redis.multi_exec()
     guild_exists = tr.sismember("guilds", guild_id)
     tr.sadd("guilds", guild_id)
     guild_attrs = {k: guild.get(k) or "" for k in GUILD_ATTRS if k in guild}
     guild_attrs["features"] = int("COMMUNITY" in guild.get("features", []))
-    tr.hmset_dict(f"guild-{guild_id}", guild_attrs)
-    if "channels" in guild:
-        tr.delete(f"roles-{guild_id}" f"channels-{guild_id}")
-        parse_channels(tr, guild_id, guild["channels"])
+
+    if is_update:
+        assign_hashmap = assign_hashmap_keep_ttl(tr, guild_id)
+        tr.hmset_dict(f"guild-{guild_id}", guild_attrs)
+        parse_emojis(assign_hashmap, guild_id, guild["emojis"])
+        if "channels" in guild:
+            parse_channels(assign_hashmap, guild_id, guild["channels"])
+        if "members" in guild and guild["members"]:
+            # Doesn't happen on guild updates, but does on guild creates for both startup and joining a guild.
+            member = guild["members"][0]
+            _assign_member(tr, guild_id, member, is_update=is_update)
+        parse_roles(assign_hashmap, guild_id, guild["roles"])
+        await execute_transaction(tr, lambda: assign(redis, guild, is_update))
     else:
-        tr.delete(f"roles-{guild_id}")
-    if "members" in guild and guild["members"]:
-        # Doesn't happen on guild updates, but does on guild creates for both startup and joining a guild.
-        member = guild["members"][0]
-        _assign_member(tr, guild_id, member)
-    parse_roles(tr, guild_id, guild["roles"])
+        current_time = time.time_ns()
+        expire_time = _get_ttl(current_time)
+        tr.zadd("guild_last_read", current_time, guild_id)
+        tr.delete(*guild_keys(guild_id))
 
-    tr.delete(f"emojis-{guild_id}")
-    parse_emojis(tr, guild_id, guild["emojis"])
+        tr.hmset_dict(f"guild-{guild_id}", guild_attrs)
+        parse_emojis(tr.hmset_dict, guild_id, guild["emojis"])
 
-    await tr.execute()
+        if "channels" in guild:
+            parse_channels(tr.hmset_dict, guild_id, guild["channels"])
+        if "members" in guild and guild["members"]:
+            member = guild["members"][0]
+            _assign_member(tr, guild_id, member, is_update=is_update)
+        parse_roles(tr.hmset_dict, guild_id, guild["roles"])
+        for key in guild_keys(guild_id):
+            tr.pexpireat(key, expire_time)
+
+        await tr.execute()
     exists = bool(await guild_exists)
     if not exists:
         if not ("members" in guild and guild["members"]):
@@ -153,7 +182,18 @@ def _do_score_metric(tr: Redis, guild_ids: List[int]):
             last_read_time.observe(i)
 
     current_time = time.time_ns()
+    expire_time = _get_ttl(current_time)
     if prometheus_enabled:
         _execute(tr, "zmscore", "guild_last_read", *guild_ids).add_done_callback(inner)
     tr.zadd("guild_last_read", *chain(*zip(cycle([current_time]), guild_ids)))
+    for guild_id in guild_ids:
+        for key in guild_keys(guild_id):
+            tr.pexpireat(key, expire_time)
 
+
+def _get_ttl(current_time: int) -> int:
+    return current_time // 1_000_000 + TWO_DAYS_IN_MILLIS
+
+
+def _get_earliest(current_time: int) -> int:
+    return current_time - TWO_DAYS_IN_MILLIS * 1_000_000

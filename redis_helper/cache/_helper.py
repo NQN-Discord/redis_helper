@@ -18,10 +18,10 @@ def guild_keys(guild_id) -> Tuple:
     return f"guild-{guild_id}", f"roles-{guild_id}", f"channels-{guild_id}", f"emojis-{guild_id}", f"me-{guild_id}", f"nick-{guild_id}", f"mem-{guild_id}"
 
 
-def parse_roles(tr, guild_id, roles):
+def parse_roles(hmset_dict, guild_id, roles):
     # The @everyone role is always present, so the roles list always has at least one element.
     return OptionallyAwaitable(
-        tr.hmset_dict(f"roles-{guild_id}", {role["id"]: RoleData(
+        hmset_dict(f"roles-{guild_id}", {role["id"]: RoleData(
             id=int(role["id"]),
             name=role["name"],
             position=role["position"],
@@ -33,14 +33,14 @@ def parse_roles(tr, guild_id, roles):
     )
 
 
-def parse_channels(tr, guild_id, channels):
+def parse_channels(hmset_dict, guild_id, channels):
     for channel in range(len(channels)-1, -1, -1):
         if channels[channel]["type"] not in (0, 5):
             del channels[channel]
 
     if not channels:
         return
-    return tr.hmset_dict(
+    return hmset_dict(
         f"channels-{guild_id}",
         {channel["id"]: _serialise_channel(channel).SerializeToString() for channel in channels}
     )
@@ -61,10 +61,8 @@ async def fetch_thread(redis, guild_id: int, thread_id: int) -> Optional[dict]:
         return thread_model
 
 
-def parse_emojis(tr, guild_id, emojis):
-    if not emojis:
-        return
-    return tr.hmset_dict(f"emojis-{guild_id}", {emoji["id"]: EmojiData(
+def parse_emojis(hmset_dict, guild_id, emojis):
+    return hmset_dict(f"emojis-{guild_id}", {emoji["id"]: EmojiData(
             id=int(emoji["id"]),
             name=emoji["name"],
             available=emoji["available"],

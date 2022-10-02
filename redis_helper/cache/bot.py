@@ -20,17 +20,22 @@ async def fetch_me(redis: Redis):
 async def assign_member(redis: Redis, member):
     tr = redis.multi_exec()
     guild_id = member["guild_id"]
-    _assign_member(tr, guild_id, member)
+    _assign_member(tr, guild_id, member, is_update=True)
     await tr.execute()
 
 
-def _assign_member(tr: Redis, guild_id, member):
+def _assign_member(tr: Redis, guild_id, member, *, is_update):
     roles = member["roles"]
     nick = member.get("nick")
     communication_disabled_until = member.get("communication_disabled_until")
     if communication_disabled_until:
         # Convert to seconds past epoch, rounding up milliseconds.
         communication_disabled_until = int(ceil(datetime.fromisoformat(communication_disabled_until).timestamp()))
+    if is_update:
+        args = ["XX", "KEEPTTL"]
+    else:
+        args = ["KEEPTTL"]
+
     _execute(
         tr,
         "SET",
@@ -40,7 +45,7 @@ def _assign_member(tr: Redis, guild_id, member):
             nick=nick,
             communication_disabled_until=communication_disabled_until
         ).SerializeToString(),
-        "KEEPTTL"
+        *args
     )
 
 

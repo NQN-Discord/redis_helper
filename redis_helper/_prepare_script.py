@@ -12,3 +12,19 @@ def prepare_script(script: str):
         except ReplyError:
             await redis.eval(script, **kwargs)
     return _call_function
+
+
+_evaluated = set()
+
+
+def prepare_script_for_transaction(script: str):
+    script = script.encode()
+    script_hash = sha1(script).hexdigest()
+
+    def _call_function(redis, **kwargs):
+        if script_hash in _evaluated:
+            return redis.evalsha(script_hash, **kwargs)
+        else:
+            redis.eval(script, **kwargs)
+            _evaluated.add(script_hash)
+    return _call_function
