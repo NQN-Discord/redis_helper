@@ -47,6 +47,10 @@ async def fetch_cached_guild_ids(redis: Redis) -> List[int]:
     return [int(i) for i in await redis.zrangebyscore("guild_last_read", _get_earliest(time.time_ns()), math.inf)]
 
 
+async def delete_uncached_guild_ids(redis: Redis):
+    await redis.zremrangebyscore("guild_last_read", 0, _get_earliest(time.time_ns()))
+
+
 async def intersect_shard(redis: Redis, shard_id: int, no_shards: int, keep: Iterator[int]):
     shard_guilds = {int(i) for i in await redis.smembers("guilds") if (int(i) >> 22) % no_shards == shard_id}
     deleted = shard_guilds - set(keep)
