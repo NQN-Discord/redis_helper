@@ -1,9 +1,12 @@
 from aioredis import Redis
 from ._helper import parse_channels, parse_thread, fetch_thread
+from ..assign_hashmap_keep_ttl import assign_hashmap_keep_ttl, execute_transaction
 
 
 async def assign(redis: Redis, guild_id: int, channel):
-    await parse_channels(redis.hmset_dict, guild_id, [channel])
+    tr = redis.multi_exec()
+    parse_channels(assign_hashmap_keep_ttl(tr, guild_id, delete_key=False), guild_id, [channel])
+    await execute_transaction(tr, lambda: assign(redis, guild_id, channel))
 
 
 async def assign_thread(redis: Redis, guild_id: int, channel, expire: int):

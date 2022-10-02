@@ -84,7 +84,7 @@ async def assign(redis: Redis, guild, is_update: bool) -> bool:
 
     if is_update:
         assign_hashmap = assign_hashmap_keep_ttl(tr, guild_id)
-        tr.hmset_dict(f"guild-{guild_id}", guild_attrs)
+        assign_hashmap(f"guild-{guild_id}", guild_attrs)
         parse_emojis(assign_hashmap, guild_id, guild["emojis"])
         if "channels" in guild:
             parse_channels(assign_hashmap, guild_id, guild["channels"])

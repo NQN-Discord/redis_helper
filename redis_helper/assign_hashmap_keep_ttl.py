@@ -17,9 +17,10 @@ end
 """)
 
 
-def assign_hashmap_keep_ttl(redis: Redis, guild_id: int):
+def assign_hashmap_keep_ttl(redis: Redis, guild_id: int, *, delete_key: bool = True):
     def _inner(key, dict_to_set):
-        redis.delete(key)
+        if delete_key:
+            redis.delete(key)
         if dict_to_set:
             assign_hashmap_keep_ttl_script(
                 redis,
