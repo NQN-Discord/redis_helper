@@ -10,7 +10,7 @@ local guild_id = ARGV[1]
 ARGV[1] = KEYS[1]
 
 local last_read_time = redis.call('ZSCORE', KEYS[2], guild_id)
-if last_read_time ~= nil then
+if last_read_time then
     redis.call('HMSET', unpack(ARGV))
     redis.call('PEXPIREAT', KEYS[1], math.floor(last_read_time / 1000000) + 172800000)
 end
