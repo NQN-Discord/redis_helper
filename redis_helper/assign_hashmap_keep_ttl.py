@@ -4,15 +4,16 @@ from aioredis import Redis, MultiExecError
 from aioredis.commands import MultiExec
 
 from redis_helper._prepare_script import prepare_script_for_transaction, _evaluated
+from redis_helper.constants import GUILD_CACHE_TIME
 
-assign_hashmap_keep_ttl_script = prepare_script_for_transaction("""
+assign_hashmap_keep_ttl_script = prepare_script_for_transaction(f"""
 local guild_id = ARGV[1]
 ARGV[1] = KEYS[1]
 
 local last_read_time = redis.call('ZSCORE', KEYS[2], guild_id)
 if last_read_time then
     redis.call('HMSET', unpack(ARGV))
-    redis.call('PEXPIREAT', KEYS[1], math.floor(last_read_time / 1000000) + 172800000)
+    redis.call('PEXPIREAT', KEYS[1], math.floor(last_read_time / 1000000) + {GUILD_CACHE_TIME})
 end
 """)
 

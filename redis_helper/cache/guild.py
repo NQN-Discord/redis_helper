@@ -7,6 +7,7 @@ from aioredis import Redis
 from aioredis.commands import MultiExec
 
 from ..assign_hashmap_keep_ttl import assign_hashmap_keep_ttl, execute_transaction
+from ..constants import GUILD_CACHE_TIME
 from ..protobuf.discord_pb2 import RoleData, ChannelData
 from ._helper import guild_keys, GUILD_ATTRS, parse_roles, parse_emojis, parse_channels
 from google.protobuf.json_format import MessageToDict
@@ -35,8 +36,6 @@ else:
             14 * day, 30 * day
         ]
     )
-
-TWO_DAYS_IN_MILLIS = 1000 * 60 * 60 * 24 * 2
 
 
 async def fetch_guild_ids(redis: Redis) -> List[int]:
@@ -196,8 +195,8 @@ def _do_score_metric(tr: Redis, guild_ids: List[int]):
 
 
 def _get_ttl(current_time: int) -> int:
-    return current_time // 1_000_000 + TWO_DAYS_IN_MILLIS
+    return current_time // 1_000_000 + GUILD_CACHE_TIME
 
 
 def _get_earliest(current_time: int) -> int:
-    return current_time - TWO_DAYS_IN_MILLIS * 1_000_000
+    return current_time - GUILD_CACHE_TIME * 1_000_000
