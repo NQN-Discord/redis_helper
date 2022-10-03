@@ -15,7 +15,7 @@ class OptionallyAwaitable:
 
 
 def guild_keys(guild_id) -> Tuple:
-    return f"guild-{guild_id}", f"roles-{guild_id}", f"channels-{guild_id}", f"emojis-{guild_id}", f"me-{guild_id}", f"nick-{guild_id}", f"mem-{guild_id}"
+    return f"guild-{guild_id}", f"roles-{guild_id}", f"channels-{guild_id}", f"emojis-{guild_id}", f"mem-{guild_id}"
 
 
 def parse_roles(hmset_dict, guild_id, roles):
