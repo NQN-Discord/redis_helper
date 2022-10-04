@@ -100,11 +100,11 @@ async def assign(redis: Redis, guild, is_update: bool) -> bool:
         tr.delete(*guild_keys(guild_id))
 
         tr.hmset_dict(f"guild-{guild_id}", guild_attrs)
-        parse_emojis(tr.hmset_dict, guild_id, guild["emojis"])
-
-        if "channels" in guild:
+        if guild.get("emojis"):
+            parse_emojis(tr.hmset_dict, guild_id, guild["emojis"])
+        if guild.get("channels"):
             parse_channels(tr.hmset_dict, guild_id, guild["channels"])
-        if "members" in guild and guild["members"]:
+        if guild.get("members"):
             member = guild["members"][0]
             _assign_member(tr, guild_id, member, is_update=is_update)
         parse_roles(tr.hmset_dict, guild_id, guild["roles"])
