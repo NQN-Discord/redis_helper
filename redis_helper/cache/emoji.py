@@ -22,4 +22,4 @@ async def fetch_guilds(redis: Redis, guild_ids: List[int]):
 
 
 def load_emojis(d):
-    return [MessageToDict(EmojiData.FromString(v), preserving_proto_field_name=True, use_integers_for_enums=True, including_default_value_fields=True) for v in d.values()]
+    return [MessageToDict(EmojiData.FromString(v), preserving_proto_field_name=True, use_integers_for_enums=True, always_print_fields_with_no_presence=True) for v in d.values()]

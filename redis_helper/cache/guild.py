@@ -166,7 +166,7 @@ async def fetch_guilds(redis: Redis, guild_ids: List[int], user):
 
 
 def load_roles(d):
-    roles = [MessageToDict(RoleData.FromString(v), preserving_proto_field_name=True, use_integers_for_enums=True, including_default_value_fields=True) for v in d.values()]
+    roles = [MessageToDict(RoleData.FromString(v), preserving_proto_field_name=True, use_integers_for_enums=True, always_print_fields_with_no_presence=True) for v in d.values()]
     for r in roles:
         bot_id = r.pop("bot_id", None)
         if bot_id and bot_id != "0":
@@ -175,7 +175,7 @@ def load_roles(d):
 
 
 def load_channels(d):
-    return [MessageToDict(ChannelData.FromString(v), preserving_proto_field_name=True, use_integers_for_enums=True, including_default_value_fields=True) for v in d.values()]
+    return [MessageToDict(ChannelData.FromString(v), preserving_proto_field_name=True, use_integers_for_enums=True, always_print_fields_with_no_presence=True) for v in d.values()]
 
 
 def _do_score_metric(tr: Redis, guild_ids: List[int]):

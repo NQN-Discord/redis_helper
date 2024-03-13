@@ -57,7 +57,7 @@ def parse_thread(tr, guild_id, channel, expire: int):
 async def fetch_thread(redis, guild_id: int, thread_id: int) -> Optional[dict]:
     thread = await redis.get(f"channels-{guild_id}-{thread_id}", encoding=None)
     if thread:
-        thread_model = MessageToDict(ThreadData.FromString(thread), preserving_proto_field_name=True, use_integers_for_enums=True, including_default_value_fields=True)
+        thread_model = MessageToDict(ThreadData.FromString(thread), preserving_proto_field_name=True, use_integers_for_enums=True, always_print_fields_with_no_presence=True)
         return thread_model
 
 
