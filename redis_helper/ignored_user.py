@@ -52,6 +52,14 @@ async def delete_user_message(redis: Redis, user: int, content: str):
         tr.srem(f"user-ratelimit-unique-{user}", content)
 
 
+async def total_for_message(redis: Redis, content: str) -> int:
+    tr = redis.pipeline()
+    total = tr.incr(f"user-ratelimit-global-{content}")
+    tr.expire(f"user-ratelimit-global-{content}", RATELIMIT_TIME)
+    await tr.execute()
+    return await total
+
+
 async def can_send_spam_dm(redis: Redis, user: int) -> bool:
     can_send = await redis.set(f"user-ratelimit-dm-{user}", 0, expire=DM_SPAM_RATELIMIT, exist=redis.SET_IF_NOT_EXIST)
     return bool(can_send)
