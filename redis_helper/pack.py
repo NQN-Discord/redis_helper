@@ -1,3 +1,4 @@
+from itertools import chain, cycle
 from typing import List, Tuple
 from aioredis import Redis
 
@@ -13,7 +14,13 @@ async def create(redis: Redis, guild_id: int, name: str):
 
 
 async def delete(redis: Redis, name: str):
-    await redis.zrem("pack-guild-names", name)
+    await redis.zrem("pack-guild-names", f"{name.lower()}{name}")
+
+async def replace_all(redis: Redis, names: List[str]):
+    tr = redis.multi_exec()
+    tr.delete("pack-guild-names")
+    tr.zadd("pack-guild-names", *chain(*zip(cycle([0]), names)))
+    await tr.execute()
 
 
 async def fetch_autocomplete(redis: Redis, start: str, limit: int) -> List[str]:
