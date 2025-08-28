@@ -7,15 +7,19 @@ def add_analytics(name: str, redis: Redis):
         add_breadcrumb(
             message=f"Requested from {name} Redis",
             category="redis",
-            data={
-                "command": command,
-                "args": args
-            }
+            data={"command": command, "args": args},
         )
 
         with start_span(
             op="redis",
-            name=f"{command.decode('utf-8')} {args}",
+            name=f"{_to_str(command)} {args}",
         ):
             return await self._pool_or_conn.execute(command, *args, **kwargs)
+
     redis.execute = execute.__get__(redis, type(redis))
+
+
+def _to_str(data: bytes | str) -> str:
+    if isinstance(data, bytes):
+        return data.decode("utf-8")
+    return data
