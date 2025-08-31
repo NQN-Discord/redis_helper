@@ -13,6 +13,7 @@ def add_analytics(name: str, redis: Redis):
         with start_span(
             op="redis",
             name=f"{_to_str(command)} {args}",
+            only_as_child_span=True,
         ):
             return await self._pool_or_conn.execute(command, *args, **kwargs)
 
