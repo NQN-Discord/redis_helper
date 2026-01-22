@@ -16,16 +16,20 @@ async def create(redis: Redis, guild_id: int, name: str):
 async def delete(redis: Redis, name: str):
     await redis.zrem("pack-guild-names", f"{name.lower()}{name}")
 
+
 async def replace_all(redis: Redis, names: List[str]):
     tr = redis.multi_exec()
     tr.delete("pack-guild-names")
-    tr.zadd("pack-guild-names", *chain(*zip(cycle([0]), names)))
+    if names:
+        tr.zadd("pack-guild-names", *chain(*zip(cycle([0]), names)))
     await tr.execute()
 
 
 async def fetch_autocomplete(redis: Redis, start: str, limit: int) -> List[str]:
-    packs = await redis.zrangebylex("pack-guild-names", min=start.lower().encode("utf8"), offset=0, count=limit)
-    return [p[len(p) // 2:] for p in packs]
+    packs = await redis.zrangebylex(
+        "pack-guild-names", min=start.lower().encode("utf8"), offset=0, count=limit
+    )
+    return [p[len(p) // 2 :] for p in packs]
 
 
 async def assign_user_packs_autocomplete(redis: Redis, user_id: int, packs: List[str]):
@@ -36,12 +40,19 @@ async def assign_user_packs_autocomplete(redis: Redis, user_id: int, packs: List
     await tr.execute()
 
 
-async def fetch_user_packs_autocomplete(redis: Redis, user_id: int, start: str, limit: int) -> Tuple[List[str], bool]:
+async def fetch_user_packs_autocomplete(
+    redis: Redis, user_id: int, start: str, limit: int
+) -> Tuple[List[str], bool]:
     tr = redis.multi_exec()
-    packs = tr.zrangebylex(f"pack-guild-names-{user_id}", min=start.lower().encode("utf8"), offset=0, count=limit)
+    packs = tr.zrangebylex(
+        f"pack-guild-names-{user_id}",
+        min=start.lower().encode("utf8"),
+        offset=0,
+        count=limit,
+    )
     exists = tr.exists(f"pack-guild-names-{user_id}")
     await tr.execute()
-    return [p[len(p) // 2:] for p in await packs], bool(await exists)
+    return [p[len(p) // 2 :] for p in await packs], bool(await exists)
 
 
 async def delete_user_pack_autocomplete(redis: Redis, user_id: int, name: str):
