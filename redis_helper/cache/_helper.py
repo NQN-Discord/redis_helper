@@ -15,26 +15,42 @@ class OptionallyAwaitable:
 
 
 def guild_keys(guild_id) -> Tuple:
-    return f"guild-{guild_id}", f"roles-{guild_id}", f"channels-{guild_id}", f"emojis-{guild_id}", f"mem-{guild_id}"
+    return (
+        f"guild-{guild_id}",
+        f"roles-{guild_id}",
+        f"channels-{guild_id}",
+        f"emojis-{guild_id}",
+        f"mem-{guild_id}",
+    )
 
 
 def parse_roles(hmset_dict, guild_id, roles):
     # The @everyone role is always present, so the roles list always has at least one element.
     return OptionallyAwaitable(
-        hmset_dict(f"roles-{guild_id}", {role["id"]: RoleData(
-            id=int(role["id"]),
-            name=role["name"],
-            position=role["position"],
-            permissions=int(role["permissions"]),
-            mentionable=role["mentionable"],
-            managed=role["managed"],
-            bot_id="tags" in role and "bot_id" in role["tags"] and int(role["tags"]["bot_id"])
-        ).SerializeToString() for role in roles})
+        hmset_dict(
+            f"roles-{guild_id}",
+            {
+                role["id"]: RoleData(
+                    id=int(role["id"]),
+                    name=role["name"],
+                    position=role["position"],
+                    permissions=int(role["permissions"]),
+                    mentionable=role["mentionable"],
+                    managed=role["managed"],
+                    bot_id=(
+                        int(role["tags"]["bot_id"])
+                        if "tags" in role and "bot_id" in role["tags"]
+                        else 0
+                    ),
+                ).SerializeToString()
+                for role in roles
+            },
+        )
     )
 
 
 def parse_channels(hmset_dict, guild_id, channels):
-    for channel in range(len(channels)-1, -1, -1):
+    for channel in range(len(channels) - 1, -1, -1):
         if channels[channel]["type"] not in (0, 5):
             del channels[channel]
 
@@ -42,7 +58,10 @@ def parse_channels(hmset_dict, guild_id, channels):
         return
     return hmset_dict(
         f"channels-{guild_id}",
-        {channel["id"]: _serialise_channel(channel).SerializeToString() for channel in channels}
+        {
+            channel["id"]: _serialise_channel(channel).SerializeToString()
+            for channel in channels
+        },
     )
 
 
@@ -50,25 +69,36 @@ def parse_thread(tr, guild_id, channel, expire: int):
     return tr.set(
         f"channels-{guild_id}-{channel['id']}",
         _serialise_thread(channel).SerializeToString(),
-        expire=expire
+        expire=expire,
     )
 
 
 async def fetch_thread(redis, guild_id: int, thread_id: int) -> Optional[dict]:
     thread = await redis.get(f"channels-{guild_id}-{thread_id}", encoding=None)
     if thread:
-        thread_model = MessageToDict(ThreadData.FromString(thread), preserving_proto_field_name=True, use_integers_for_enums=True, always_print_fields_with_no_presence=True)
+        thread_model = MessageToDict(
+            ThreadData.FromString(thread),
+            preserving_proto_field_name=True,
+            use_integers_for_enums=True,
+            always_print_fields_with_no_presence=True,
+        )
         return thread_model
 
 
 def parse_emojis(hmset_dict, guild_id, emojis):
-    return hmset_dict(f"emojis-{guild_id}", {emoji["id"]: EmojiData(
-            id=int(emoji["id"]),
-            name=emoji["name"],
-            available=emoji["available"],
-            animated=emoji["animated"],
-            roles=(int(i) for i in emoji.get("roles", ())),
-        ).SerializeToString() for emoji in emojis})
+    return hmset_dict(
+        f"emojis-{guild_id}",
+        {
+            emoji["id"]: EmojiData(
+                id=int(emoji["id"]),
+                name=emoji["name"],
+                available=emoji["available"],
+                animated=emoji["animated"],
+                roles=(int(i) for i in emoji.get("roles", ())),
+            ).SerializeToString()
+            for emoji in emojis
+        },
+    )
 
 
 def _serialise_channel(channel):
@@ -87,7 +117,7 @@ def _serialise_channel(channel):
                 allow=int(overwrite["allow"]),
             )
             for overwrite in channel["permission_overwrites"]
-        )
+        ),
     )
 
 
@@ -96,5 +126,5 @@ def _serialise_thread(thread):
         id=thread["id"],
         name=thread["name"],
         type=thread["type"],
-        parent_id=thread["parent_id"]
+        parent_id=thread["parent_id"],
     )
