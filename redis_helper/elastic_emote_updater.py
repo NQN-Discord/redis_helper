@@ -4,8 +4,8 @@ from aioredis import Redis
 REDIS_KEY = "elastic_emote_cache"
 
 
-async def push(redis: Redis, payload: str):
-    await redis.rpush(REDIS_KEY, payload)
+async def push(redis: Redis, *payload: str):
+    await redis.rpush(REDIS_KEY, *payload)
 
 
 async def fetch_all(redis: Redis) -> List[str]:
