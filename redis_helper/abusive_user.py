@@ -16,4 +16,3 @@ async def create(redis: Redis, user: int, *users: int) -> NoReturn:
 
 async def delete(redis: Redis, user: int) -> NoReturn:
     await redis.srem("message-repost-abusive-users", user)
-

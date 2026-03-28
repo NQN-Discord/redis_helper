@@ -30,11 +30,23 @@ else:
         namespace="nqn_common",
         buckets=[
             0,
-            10, 60, 120, 300, 600, 1800,
-            hour, 2 * hour, 6 * hour, 12 * hour,
-            day, 2 * day, 3 * day, 7 * day,
-            14 * day, 30 * day
-        ]
+            10,
+            60,
+            120,
+            300,
+            600,
+            1800,
+            hour,
+            2 * hour,
+            6 * hour,
+            12 * hour,
+            day,
+            2 * day,
+            3 * day,
+            7 * day,
+            14 * day,
+            30 * day,
+        ],
     )
 
 
@@ -43,15 +55,26 @@ async def fetch_guild_ids(redis: Redis) -> List[int]:
 
 
 async def fetch_cached_guild_ids(redis: Redis) -> List[int]:
-    return [int(i) for i in await redis.zrangebyscore("guild_last_read", _get_earliest(time.time_ns()), math.inf)]
+    return [
+        int(i)
+        for i in await redis.zrangebyscore(
+            "guild_last_read", _get_earliest(time.time_ns()), math.inf
+        )
+    ]
 
 
 async def delete_uncached_guild_ids(redis: Redis):
     await redis.zremrangebyscore("guild_last_read", 0, _get_earliest(time.time_ns()))
 
 
-async def intersect_shard(redis: Redis, shard_id: int, no_shards: int, keep: Iterator[int]):
-    shard_guilds = {int(i) for i in await redis.smembers("guilds") if (int(i) >> 22) % no_shards == shard_id}
+async def intersect_shard(
+    redis: Redis, shard_id: int, no_shards: int, keep: Iterator[int]
+):
+    shard_guilds = {
+        int(i)
+        for i in await redis.smembers("guilds")
+        if (int(i) >> 22) % no_shards == shard_id
+    }
     deleted = shard_guilds - set(keep)
 
     if deleted:
@@ -132,11 +155,13 @@ async def fetch_guilds(redis: Redis, guild_ids: List[int], user):
         "emojis": tr.hgetall,
         "roles": tr.hgetall,
         "guild": tr.hgetall,
-        "mem": tr.get
+        "mem": tr.get,
     }
     futures = {}
     for guild_id in guild_ids:
-        futures[guild_id] = {attr: f(f"{attr}-{guild_id}", encoding=None) for attr, f in attrs.items()}
+        futures[guild_id] = {
+            attr: f(f"{attr}-{guild_id}", encoding=None) for attr, f in attrs.items()
+        }
     await tr.execute()
     del tr
     for guild_id in guild_ids:
@@ -144,12 +169,12 @@ async def fetch_guilds(redis: Redis, guild_ids: List[int], user):
             "channels": load_channels(await futures[guild_id]["channels"]),
             "emojis": load_emojis(await futures[guild_id]["emojis"]),
             "roles": load_roles(await futures[guild_id]["roles"]),
-            "members": [{
-                "user": user,
-                **get_member(await futures[guild_id]["mem"])
-            }],
+            "members": [{"user": user, **get_member(await futures[guild_id]["mem"])}],
             "id": guild_id,
-            **{k.decode("utf-8"): v.decode("utf-8") for k, v in (await futures[guild_id]["guild"]).items()},
+            **{
+                k.decode("utf-8"): v.decode("utf-8")
+                for k, v in (await futures[guild_id]["guild"]).items()
+            },
         }
         for channel in guild["channels"]:
             channel.pop("topic", None)
@@ -166,7 +191,15 @@ async def fetch_guilds(redis: Redis, guild_ids: List[int], user):
 
 
 def load_roles(d):
-    roles = [MessageToDict(RoleData.FromString(v), preserving_proto_field_name=True, use_integers_for_enums=True, always_print_fields_with_no_presence=True) for v in d.values()]
+    roles = [
+        MessageToDict(
+            RoleData.FromString(v),
+            preserving_proto_field_name=True,
+            use_integers_for_enums=True,
+            always_print_fields_with_no_presence=True,
+        )
+        for v in d.values()
+    ]
     for r in roles:
         bot_id = r.pop("bot_id", None)
         if bot_id and bot_id != "0":
@@ -175,12 +208,23 @@ def load_roles(d):
 
 
 def load_channels(d):
-    return [MessageToDict(ChannelData.FromString(v), preserving_proto_field_name=True, use_integers_for_enums=True, always_print_fields_with_no_presence=True) for v in d.values()]
+    return [
+        MessageToDict(
+            ChannelData.FromString(v),
+            preserving_proto_field_name=True,
+            use_integers_for_enums=True,
+            always_print_fields_with_no_presence=True,
+        )
+        for v in d.values()
+    ]
 
 
 def _do_score_metric(tr: Redis, guild_ids: List[int]):
     def inner(future):
-        results = [0 if i is None else (current_time - float(i)) / 10**9 for i in future.result()]
+        results = [
+            0 if i is None else (current_time - float(i)) / 10**9
+            for i in future.result()
+        ]
         for i in results:
             last_read_time.observe(i)
 

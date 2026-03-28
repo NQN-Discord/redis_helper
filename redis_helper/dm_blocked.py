@@ -1,7 +1,6 @@
 from typing import NoReturn
 from aioredis import Redis
 
-
 DM_BLOCK_TIME = 24 * 60 * 60
 
 

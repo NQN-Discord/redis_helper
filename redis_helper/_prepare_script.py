@@ -11,6 +11,7 @@ def prepare_script(script: str):
             await redis.evalsha(script_hash, **kwargs)
         except ReplyError:
             await redis.eval(script, **kwargs)
+
     return _call_function
 
 
@@ -27,4 +28,5 @@ def prepare_script_for_transaction(script: str):
         else:
             redis.eval(script, **kwargs)
             _evaluated.add(script_hash)
+
     return _call_function

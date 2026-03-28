@@ -1,7 +1,6 @@
 from aioredis import Redis
 from uuid import uuid4
 
-
 INTERACTION_CACHE_TIME = 3 * 60 * 60
 
 

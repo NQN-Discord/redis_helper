@@ -26,11 +26,9 @@ def assign_hashmap_keep_ttl(redis: Redis, guild_id: int, *, delete_key: bool = T
             assign_hashmap_keep_ttl_script(
                 redis,
                 keys=[key, "guild_last_read"],
-                args=[
-                    guild_id,
-                    *chain.from_iterable(dict_to_set.items())
-                ]
+                args=[guild_id, *chain.from_iterable(dict_to_set.items())],
             )
+
     return _inner
 
 
@@ -38,7 +36,7 @@ async def execute_transaction(tr: MultiExec, on_fail):
     try:
         await tr.execute()
     except MultiExecError as e:
-        if e.args[1][0].args == ('NOSCRIPT No matching script. Please use EVAL.',):
+        if e.args[1][0].args == ("NOSCRIPT No matching script. Please use EVAL.",):
             _evaluated.clear()
             await on_fail()
         else:

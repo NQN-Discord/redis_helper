@@ -4,7 +4,9 @@ import msgpack
 
 
 async def assign(redis: Redis, data):
-    await redis.set(f"guild-settings-cache-{data['guild_id']}", msgpack.packb(data), expire=60)
+    await redis.set(
+        f"guild-settings-cache-{data['guild_id']}", msgpack.packb(data), expire=60
+    )
 
 
 async def delete(redis: Redis, guild_id: int):

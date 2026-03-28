@@ -1,5 +1,6 @@
 from typing import NoReturn, Tuple
 from aioredis import Redis
+
 try:
     from contextlib import asynccontextmanager
 except ImportError:
@@ -38,7 +39,9 @@ async def _ttl(redis, user):
         await redis.expire(f"user-ratelimit-unique-{user}", RATELIMIT_TIME)
 
 
-async def total_and_unique_messages(redis: Redis, user: int, content: str) -> Tuple[int, int, bool]:
+async def total_and_unique_messages(
+    redis: Redis, user: int, content: str
+) -> Tuple[int, int, bool]:
     async with _ttl(redis, user) as tr:
         total = tr.incr(f"user-ratelimit-count-{user}")
         is_unique = tr.sadd(f"user-ratelimit-unique-{user}", content)
@@ -61,5 +64,10 @@ async def total_for_message(redis: Redis, content: str) -> int:
 
 
 async def can_send_spam_dm(redis: Redis, user: int) -> bool:
-    can_send = await redis.set(f"user-ratelimit-dm-{user}", 0, expire=DM_SPAM_RATELIMIT, exist=redis.SET_IF_NOT_EXIST)
+    can_send = await redis.set(
+        f"user-ratelimit-dm-{user}",
+        0,
+        expire=DM_SPAM_RATELIMIT,
+        exist=redis.SET_IF_NOT_EXIST,
+    )
     return bool(can_send)

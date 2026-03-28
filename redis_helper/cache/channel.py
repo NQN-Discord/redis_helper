@@ -5,7 +5,9 @@ from ..assign_hashmap_keep_ttl import assign_hashmap_keep_ttl, execute_transacti
 
 async def assign(redis: Redis, guild_id: int, channel):
     tr = redis.multi_exec()
-    parse_channels(assign_hashmap_keep_ttl(tr, guild_id, delete_key=False), guild_id, [channel])
+    parse_channels(
+        assign_hashmap_keep_ttl(tr, guild_id, delete_key=False), guild_id, [channel]
+    )
     await execute_transaction(tr, lambda: assign(redis, guild_id, channel))
 
 

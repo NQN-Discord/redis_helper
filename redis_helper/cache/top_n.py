@@ -1,7 +1,6 @@
 from typing import NoReturn, List, Tuple
 from aioredis import Redis, ReplyError
 
-
 TWO_WEEKS = 3600 * 24 * 14
 
 
@@ -27,7 +26,10 @@ async def add_emoji(redis: Redis, user_id: int, emoji_ids: List[int]) -> NoRetur
 
 async def list_emojis(redis: Redis, user_id: int) -> List[int]:
     try:
-        return [int(i) for i in await redis.execute("TOPK.LIST", f"user-top-emojis-{user_id}")]
+        return [
+            int(i)
+            for i in await redis.execute("TOPK.LIST", f"user-top-emojis-{user_id}")
+        ]
     except ReplyError as e:
         if e.args != ("TopK: key does not exist",):
             raise
@@ -36,7 +38,9 @@ async def list_emojis(redis: Redis, user_id: int) -> List[int]:
 
 async def add_guild_emojis(redis: Redis, guild_id: int, emoji_ids: List[int]):
     if emoji_ids:
-        await redis.sadd("recently_used_emojis", *[f"{guild_id}-{e}" for e in emoji_ids])
+        await redis.sadd(
+            "recently_used_emojis", *[f"{guild_id}-{e}" for e in emoji_ids]
+        )
 
 
 async def pop_all_recently_used_emojis(redis: Redis) -> List[Tuple[int, int]]:

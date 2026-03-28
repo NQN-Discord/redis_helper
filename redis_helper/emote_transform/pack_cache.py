@@ -1,15 +1,20 @@
 from typing import List, NoReturn, Optional
 from aioredis import Redis
 
-
 ONE_DAY = 24 * 60 * 60
 
 
-async def assign(redis: Redis, guild_id: int, emotes: List[str], pack_id: int) -> NoReturn:
+async def assign(
+    redis: Redis, guild_id: int, emotes: List[str], pack_id: int
+) -> NoReturn:
     if emotes:
         tr = redis.pipeline()
         for emote in emotes:
-            tr.set(f"emote_transform-pack-cache-{guild_id}-{emote}", pack_id, expire=ONE_DAY)
+            tr.set(
+                f"emote_transform-pack-cache-{guild_id}-{emote}",
+                pack_id,
+                expire=ONE_DAY,
+            )
         await tr.execute()
 
 

@@ -6,7 +6,10 @@ import json
 async def fetch_latency(redis) -> Dict[int, Optional[float]]:
     tr = redis.pipeline()
     no_shards = int(await redis.get("gateway-shard-count"))
-    latency_futures = {shard_id: tr.get(f"gateway-shard-latency-{shard_id}") for shard_id in range(no_shards)}
+    latency_futures = {
+        shard_id: tr.get(f"gateway-shard-latency-{shard_id}")
+        for shard_id in range(no_shards)
+    }
     await tr.execute()
     latencies = {}
     for k, v in latency_futures.items():
@@ -17,7 +20,9 @@ async def fetch_latency(redis) -> Dict[int, Optional[float]]:
     return latencies
 
 
-async def assign_latencies(redis, shard_count: int, latencies: Dict[int, float], timeout: int):
+async def assign_latencies(
+    redis, shard_count: int, latencies: Dict[int, float], timeout: int
+):
     tr = redis.pipeline()
     tr.set("gateway-shard-count", shard_count)
     for shard_id, latency in latencies.items():
@@ -26,16 +31,18 @@ async def assign_latencies(redis, shard_count: int, latencies: Dict[int, float],
 
 
 async def assign_resumable_shards(
-        redis,
-        connection_id: str,
-        shards: Dict[int, Dict[str, Any]],
-        total_shards: int,
-        timeout: float
+    redis,
+    connection_id: str,
+    shards: Dict[int, Dict[str, Any]],
+    total_shards: int,
+    timeout: float,
 ):
     tr = redis.pipeline()
     tr.set(f"gateway-resume-{connection_id}", total_shards, expire=timeout)
     for shard_id, session_info in shards.items():
-        tr.set(f"gateway-shard-resume-{shard_id}", json.dumps(session_info), expire=timeout)
+        tr.set(
+            f"gateway-shard-resume-{shard_id}", json.dumps(session_info), expire=timeout
+        )
     await tr.execute()
 
 

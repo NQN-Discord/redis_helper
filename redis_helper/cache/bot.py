@@ -30,7 +30,9 @@ def _assign_member(tr: Redis, guild_id, member, *, is_update):
     communication_disabled_until = member.get("communication_disabled_until")
     if communication_disabled_until:
         # Convert to seconds past epoch, rounding up milliseconds.
-        communication_disabled_until = int(ceil(datetime.fromisoformat(communication_disabled_until).timestamp()))
+        communication_disabled_until = int(
+            ceil(datetime.fromisoformat(communication_disabled_until).timestamp())
+        )
     if is_update:
         args = ["XX", "KEEPTTL"]
     else:
@@ -43,16 +45,20 @@ def _assign_member(tr: Redis, guild_id, member, *, is_update):
         MeMemberData(
             roles=[int(r) for r in roles],
             nick=nick,
-            communication_disabled_until=communication_disabled_until
+            communication_disabled_until=communication_disabled_until,
         ).SerializeToString(),
-        *args
+        *args,
     )
 
 
 def get_member(member_bytes: bytes):
-    member_data = MessageToDict(MeMemberData.FromString(member_bytes or b""), preserving_proto_field_name=True, use_integers_for_enums=True, always_print_fields_with_no_presence=True)
+    member_data = MessageToDict(
+        MeMemberData.FromString(member_bytes or b""),
+        preserving_proto_field_name=True,
+        use_integers_for_enums=True,
+        always_print_fields_with_no_presence=True,
+    )
     member_data["communication_disabled_until"] = datetime.fromtimestamp(
-        int(member_data.get("communication_disabled_until", "0")),
-        tz=timezone.utc
+        int(member_data.get("communication_disabled_until", "0")), tz=timezone.utc
     ).isoformat()
     return member_data

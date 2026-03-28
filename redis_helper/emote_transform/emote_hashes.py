@@ -4,7 +4,6 @@ from collections import defaultdict
 import datetime
 from .._prepare_script import prepare_script
 
-
 EMOJI_COUNT_PER_DAY = 400
 hitters_script = prepare_script(f"""
 local set = KEYS[1]
@@ -32,7 +31,9 @@ async def add_hashes(redis: Redis, hashes: List[str]):
 async def get_hashes(redis: Redis):
     pipeline = redis.pipeline()
     for day_number in range(7):
-        pipeline.zrevrange(f"emoji-heavy-hitters-{day_number}", 0, EMOJI_COUNT_PER_DAY, withscores=True)
+        pipeline.zrevrange(
+            f"emoji-heavy-hitters-{day_number}", 0, EMOJI_COUNT_PER_DAY, withscores=True
+        )
     results = await pipeline.execute()
     rtn = defaultdict(lambda: 0)
     for day in results:
